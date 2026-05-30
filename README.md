@@ -24,6 +24,8 @@ install required packages using
 pip install Flask chess
 ```
 
+from https://github.com/official-stockfish/Stockfish/releases, download the lastest version of Stockfish and ensure that the stockfish.exe binary is located under engine\stockfish\stockfish.exe
+
 ## usage
 ```
 $ python3 backend\app.py
