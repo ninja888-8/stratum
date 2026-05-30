@@ -1,0 +1,26 @@
+/* level description side panel near board */
+.level-description {
+    width: 260px;
+    margin-left: 10px;
+    background-color: #587fa5; 
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    color: #ffffff;
+    font-family: sans-serif;
+}
+
+.level-description h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 10px;
+}

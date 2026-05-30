@@ -1,0 +1,58 @@
+@import 'components/controls.css';
+@import 'components/difficulty-selection.css';
+@import 'components/home-button.css';
+@import 'components/level-description.css';
+@import 'mechanics/chessboard.css';
+@import 'mechanics/promotion.css';
+@import 'settings/levels.css';
+@import 'settings/settings.css';
+
+:root {
+    --bg-color: #2c3e50;
+    --sidebar-bg: #ffffff;
+    --board-dark: #b58863;
+    --board-light: #f0d9b5;
+    --highlight: rgba(255, 255, 0, 0.4);
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #d5e1df;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    display: flex;
+    background: var(--sidebar-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    gap: 20px;
+}
+
+.menu {
+    display: fixed;
+    background: var(--sidebar-bg);
+    width: 50%;
+    height: 50%;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    gap: 20px;
+}
+
+/* for board and the side console */
+.game-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* forces console to match board height */
+    gap: 0; /* keeps them attached w/ no gap */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    overflow: visible;
+}

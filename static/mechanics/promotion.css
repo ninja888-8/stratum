@@ -1,0 +1,60 @@
+/* dimming background after promotion screen */
+.promotion-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* actual promotion popup screen */
+.promotion-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.promotion-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-family: sans-serif;
+    color: #2c3e50;
+}
+
+/* container for the choice buttons */
+.promotion-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* individual piece option buttons */
+.promotion-option {
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
+    background-color: #f0d9b5;
+    border: 2px solid #b58863;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.promotion-option:hover {
+    background-color: #e2c499;
+    transform: scale(1.05);
+}
+
+.promotion-option:active {
+    transform: scale(0.95);
+}

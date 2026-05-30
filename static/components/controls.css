@@ -1,0 +1,47 @@
+.sidebar {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.status-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 5px solid var(--bg-color);
+    margin-bottom: 20px;
+}
+
+.controls button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+    background: var(--bg-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.controls button:hover { opacity: 0.9; }
+
+/* dimming background after opening a sidebar */
+.sidebar-overlay {
+    display: none; /* normally hidden entirely */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* to fade the overlay in smoothly */
+.sidebar-overlay.active {
+    opacity: 1;
+}

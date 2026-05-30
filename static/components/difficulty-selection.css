@@ -1,0 +1,127 @@
+.side-console {
+    width: 260px;
+    background-color: #2c3e50; 
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    color: #ffffff;
+    font-family: sans-serif;
+}
+
+.side-console h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 10px;
+}
+
+/* row container for splitting buttons */
+.console-row {
+    display: flex;
+    gap: 10px; /* space between buttons in the row */
+    width: 100%;
+}
+
+.console-btn {
+    position: relative; 
+    flex: 1; /* split space evenly inside a .console-row */
+    color: #ffffff;
+    border: none;
+    padding: 8px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-align: center;
+}
+
+.console-btn:active {
+    transform: scale(0.97); /* compression feedback */
+    z-index: 1;
+}
+
+/* green buttons */
+.console-btn.btn-green {
+    background-color: #27ae60;
+}
+
+.console-btn.btn-green:hover {
+    background-color: #2ecc71;
+}
+
+.console-btn.btn-green.active-toggle {
+    background-color: #1e8449;
+    filter: invert(1);
+    z-index: 1;
+}
+
+/* yellow buttons */
+.console-btn.btn-yellow {
+    background-color: #e6cd45;
+}
+
+.console-btn.btn-yellow:hover {
+    background-color: #e4d375;
+}
+
+.console-btn.btn-yellow.active-toggle {
+    background-color: #dfbe06;
+    filter: invert(1);
+    z-index: 1;
+}
+
+/* red buttons */
+.console-btn.btn-red {
+    background-color: #c0392b;
+}
+
+.console-btn.btn-red:hover {
+    background-color: #e74c3c;
+}
+
+.console-btn.btn-red.active-toggle {
+    background-color: #922b21;
+    filter: invert(1);
+    z-index: 1;
+}
+
+.console-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 105%; 
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #111111;
+    color: #ffffff;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: normal;
+    border-radius: 4px;
+    white-space: normal;
+    width: 160px; 
+    text-align: left;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none; 
+    transition: opacity 0.2s ease;
+}
+
+.console-btn:hover::after {
+    opacity: 1;
+}
+
+/* uniform button image icon */
+.btn-icon {
+    height: 32px;
+    width: auto; 
+    max-width: 100%;
+    pointer-events: none;
+}

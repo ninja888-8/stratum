@@ -1,0 +1,29 @@
+/* home button in bottom right */
+.home-btn {
+    position: fixed; /* relative to the browser window screen */
+    bottom: 25px;
+    right: 25px;
+    width: 55px;
+    height: 55px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 50%; /* perfect circle button */
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* floating shadow lift */
+    z-index: 10000;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.home-btn:hover {
+    background-color: #1abc9c;
+    transform: scale(1.08); /* pop-out expansion */
+}
+
+/* compression on click */
+.home-btn:active {
+    transform: scale(0.95);
+}
