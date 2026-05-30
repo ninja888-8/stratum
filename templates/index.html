@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stratum</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+
+<div class="menu">
+    <div class="sidebar">
+        <div>
+            <h2>> stratum <</h2>
+        </div>
+        
+        <div class="controls">
+            <button onclick="openInstructions()">Instructions</button>
+            <button onclick="openSettings()">Settings</button>
+            <button onclick="openLevelSelect()">Level Select</button>
+        </div>
+    </div>
+
+    <!-- settings menu -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
+    <div id="settingsSidebar" class="settings-sidebar">
+        <div class="sidebar-header">
+            <h3>Game Settings</h3>
+            <button class="close-sidebar-btn" onclick="closeSettings()">×</button>
+        </div>
+        
+        <!-- specific settings -->
+        <!-- TODO: add more themes -->
+        <div class="setting-item">
+            <label for="themeSelect">Board Theme:</label>
+            <select id="boardThemeSelect" onchange="boardThemeSelected()">
+                <option value="classic">Classic Wood</option>
+                <option value="green">Tournament Green</option>
+                <option value="blue">Ocean Blue</option>
+            </select>
+
+            <label for="themeSelect">Board Pieces:</label>
+            <select id="pieceThemeSelect" onchange="pieceThemeSelected()">
+                <option value="text">Classic Text</option>
+                <option value="modern">Modern</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- level select menu -->
+    <div id="levelOverlay" class="sidebar-overlay" onclick="closeLevelSelect()"></div>
+    <div id="levelSidebar" class="settings-sidebar">
+        <div class="sidebar-header">
+            <h3>Select Level</h3>
+            <button class="close-sidebar-btn" onclick="closeLevelSelect()">×</button>
+        </div>
+        
+        <div class="level-container">
+            <div id="levelGrid" class="level-grid">
+                <!-- buttons added through Javascript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/settings.js"></script>
+<script src="/static/home.js"></script>
+
+</body>
+</html>
