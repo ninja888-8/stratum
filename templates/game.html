@@ -39,7 +39,7 @@
                 <button id="btn-5" class="console-btn btn-green" data-tooltip="Start with an extra Pawn." data-id=5>
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-green" data-tooltip="Start with two extra moves." data-id=6>
+                <button class="console-btn btn-green" data-tooltip="Start with one extra move." data-id=6>
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-green" data-tooltip="Gain undo-move button." data-id=7>
@@ -55,7 +55,7 @@
                 <button class="console-btn btn-yellow" data-tooltip="Both sides have their first rank pieces randomized.">
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Start with two extra moves.">
+                <button class="console-btn btn-yellow" data-tooltip="Start with one extra move.">
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-yellow" data-tooltip="Gain undo-move button.">
@@ -104,10 +104,40 @@
             <div class="setting-item">
                 <label for="engineSelect">Engine Difficulty:</label>
                 <select id="engineSelect" onchange="difficultySelected()">
-                    <option value="beginner">Beginner (800) ⭐</option>
-                    <option value="intermediate">Intermediate (1500) ⭐⭐</option>
-                    <option value="advanced">Advanced (2200) ⭐⭐⭐</option>
+                    <option value="1">Intermediate (1320) ⭐</option>
+                    <option value="2">Advanced (1800) ⭐⭐</option>
+                    <option value="3">Expert (2200) ⭐⭐⭐</option>
                 </select>
+            </div>
+
+            <div class="challenges-section">
+                <h3 class="challenges-title">Challenges</h3>
+                
+                <div class="challenges-grid">
+                    <div id="challenge-1" class="challenge-card">
+                        <div class="challenge-header">
+                            <span class="challenge-star">★</span>
+                            <span class="challenge-status">Locked</span>
+                        </div>
+                        <p class="challenge-desc"></p>
+                    </div>
+
+                    <div id="challenge-2" class="challenge-card">
+                        <div class="challenge-header">
+                            <span class="challenge-star">★</span>
+                            <span class="challenge-status">Locked</span>
+                        </div>
+                        <p class="challenge-desc"></p>
+                    </div>
+
+                    <div id="challenge-3" class="challenge-card">
+                        <div class="challenge-header">
+                            <span class="challenge-star">★</span>
+                            <span class="challenge-status">Locked</span>
+                        </div>
+                        <p class="challenge-desc"></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -122,8 +152,8 @@
         </div>
         
         <div class="controls">
-            <button onclick="resetGame()">New Game</button>
-            <button onclick="undoMove()">Undo</button>
+            <button id="new-game" onclick="resetGame(); releaseSettings();">New Game</button>
+            <button onclick="undoMove(); undoMove();">Undo</button>
             <button onclick="openSettings()">Settings</button>
             <button onclick="openLevelSelect()">Level Select</button>
         </div>
@@ -180,6 +210,37 @@
             <div id="levelGrid" class="level-grid">
                 <!-- buttons added through Javascript -->
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="gameOverModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2 id="modalStatus" class="modal-title">LEVEL [result]</h2>
+        
+        <div id="modalStars" class="stars-container">
+            <span class="star" data-star="1">★</span>
+            <span class="star" data-star="2">★</span>
+            <span class="star" data-star="3">★</span>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="modal-details">
+            <div class="detail-item">
+                <span class="detail-label">stockfish difficulty:</span>
+                <span id="modalDifficulty" class="detail-value">[difficulty]</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">active modifiers:</span>
+                <ul id="modalModifiers" class="modifier-list">
+                    </ul>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="modal-btn primary-btn" onclick="resetGame()">Play Again</button>
+            <button class="modal-btn secondary-btn" onclick="selectNextLevel(); resetGame();">Next Level</button>
         </div>
     </div>
 </div>

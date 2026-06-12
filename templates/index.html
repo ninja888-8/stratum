@@ -21,6 +21,38 @@
         </div>
     </div>
 
+    <div id="instructionsModal" class="modal-overlay hidden" onclick="closeInstructionsClick(event)">
+        <div class="modal-content large">
+            <h2 class="modal-header">stratum</h2>
+
+            <div class="modal-body-scroll">
+                <p>single player chess (against the engine) with a small twist!?</p>
+                <p>each separate level challenges you against an increasingly difficult starting position. each level contains three difficulties:</p>
+                <ul>
+                    <li>★ (Intermediate): Roughly 1320 elo</li>
+                    <li>★★ (Advanced): Roughly 1800 elo.</li>
+                    <li>★★★ (Expert): Roughly 2200 elo.</li>
+                </ul>
+                <p>either draw or win the game to succeed!</p>
+
+                <p>seems difficult? keep in mind that there are difficulty modifiers implemented in game</p>
+                <div class="instruction-img-container">
+                    <img src="static/images/modifiers.png" class="instruction-img">
+                    <p class="img-caption">Use the side console to toggle game modifiers before clicking into the match</p>
+                </div>
+
+                <p>challenges listed under each level require the specific difficulty and modifiers active, in any run</p>
+                <div class="instruction-img-container">
+                    <img src="static/images/challenges.png" class="instruction-img">
+                    <p class="img-caption">Meet challenge requirements and pass the level to earn the challenge star</p>
+                </div>
+
+                <hr class="modal-divider">
+                <button class="modal-close-action-btn" onclick="closeInstructions()">close</button>
+            </div>
+        </div>
+    </div>    
+
     <!-- settings menu -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
     <div id="settingsSidebar" class="settings-sidebar">
