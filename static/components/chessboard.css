@@ -1,0 +1,52 @@
+#chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 72px);
+    grid-template-rows: repeat(8, 72px);
+    border: 5px solid #3d2f1f;
+    position: relative;
+}
+
+#chessboard.pending-confirmation {
+    cursor: pointer;
+}
+
+#chessboard.pending-confirmation .square {
+    opacity: 0.35;
+    filter: blur(0.5px);
+    pointer-events: none;
+}
+
+#chessboard.pending-confirmation::after {
+    content: "tap board to begin (locks settings)";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #3d2f1f;
+    color: #ffffff;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    white-space: nowrap;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.square {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.square.light { background-color: var(--board-light); }
+.square.dark { background-color: var(--board-dark); }
+.square.selected { background-color: #7b9652 !important; }
+.square.check { background-color: #f56464; }
+.square.moveable { background-color: #bbfcdb; }
