@@ -101,10 +101,6 @@ function levelSelected(id) {
 
     document.getElementById("level-number").textContent = "Level " + id;
     currentLevelSelected = id;
-    // switch(id) {
-    //     case 1:
-
-    // }
 }
 
 function unlockNextLevel() {
@@ -116,19 +112,25 @@ function unlockNextLevel() {
     }
 }
 
+function selectNextLevel() {
+    const modal = document.getElementById('gameOverModal');
+    modal.classList.add('hidden');
+    levelSelected(currentLevelSelected+1);
+}
+
 // engine difficulty selected (sets the stars that would be earned)
 async function difficultySelected() {
     const engineDifficulty = document.getElementById("engineSelect");
     localStorage.setItem('defaultEngineDifficulty', engineDifficulty.value);
 
     let stockfish_elo = null;
-    if (engineDifficulty.value == "beginner") {
-        stockfish_elo = 800;
+    if (engineDifficulty.value == "1") {
+        stockfish_elo = 1320;
     }
-    else if (engineDifficulty.value == "intermediate") {
-        stockfish_elo = 1500;
+    else if (engineDifficulty.value == "2") {
+        stockfish_elo = 1800;
     }
-    else if (engineDifficulty.value == "advanced") {
+    else if (engineDifficulty.value == "3") {
         stockfish_elo = 2200;
     }
     
@@ -214,7 +216,7 @@ function buttonDisabling() {
                     const targetBtn = document.getElementById(idToBlock);
                     if (targetBtn != btn) {
                         targetBtn.disabled = true;
-                        targetBtn.classList.add('btn-locked'); // to style later
+                        targetBtn.classList.add('btn-locked'); // TODO: to style later
                     }
                 });
             }

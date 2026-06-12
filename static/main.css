@@ -1,9 +1,11 @@
+@import 'components/chessboard.css';
 @import 'components/controls.css';
 @import 'components/difficulty-selection.css';
 @import 'components/home-button.css';
 @import 'components/level-description.css';
-@import 'mechanics/chessboard.css';
 @import 'mechanics/promotion.css';
+@import 'screens/gameover.css';
+@import 'screens/instructions.css';
 @import 'settings/levels.css';
 @import 'settings/settings.css';
 

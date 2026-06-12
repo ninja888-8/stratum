@@ -3,6 +3,7 @@ const boardElement = document.getElementById('chessboard');
 const NUM_LEVELS = 25;
 const BUFF_MULTIPLIERS = [0.5, 0.5, 0.6, 0.6, 0.8, 0.8, 0.9, 0.9];
 let selectedSquare = null;
+let isConfirmed = false;
 
 // mapping chess letters to unicode characters
 const pieceMap = {
@@ -11,9 +12,52 @@ const pieceMap = {
     '.': ''
 };
 
+// FENs of starting positions for the levels, 0-indexed
+const startingPositions = [
+    "3qk3/3pp3/8/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1",
+    "r4rk1/1p3pbp/p5p1/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1",
+    "r2qk2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "6k1/pp3pp1/2n1pq1n/2bp3p/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1",
+    "r1bqkb1r/pp1pp1pp/2p2p2/8/2BPPB2/8/PPPQ1PPP/3RR1K1 w kq - 0 1"
+];
+
+const challenges = [
+    [
+        "Beat the level on ⭐ with an extra piece active.",
+        "Beat the level on ⭐⭐ with no modifiers.",
+        "Beat the level on ⭐⭐⭐ with an extra piece AND 1 other modifier."
+    ],
+
+    [
+        "Beat the level on ⭐ with an extra piece active.",
+        "Beat the level on ⭐⭐ with no modifiers.",
+        "Beat the level on ⭐⭐⭐ with an extra piece AND 1 other modifier."
+    ],
+
+    [
+        "Beat the level on ⭐ with an extra piece active.",
+        "Beat the level on ⭐⭐ with no modifiers.",
+        "Beat the level on ⭐⭐⭐ with an extra piece AND 1 other modifier."
+    ],
+
+    [
+        "Beat the level on ⭐ with an extra piece active.",
+        "Beat the level on ⭐⭐ with no modifiers.",
+        "Beat the level on ⭐⭐⭐ with an extra piece AND 1 other modifier."
+    ]
+];
+
 // Initialize board squares
 function createBoard() {
     boardElement.innerHTML = '';
+    boardElement.onclick = (e) => {
+        if (!isConfirmed) {
+            confirmSettings();
+            // stop the click from immediately selecting a piece on the very first touch
+            e.stopPropagation(); 
+            return;
+        }
+    };
     for (let i = 0; i < 64; i++) {
         const square = document.createElement('div');
         const row = Math.floor(i / 8);
@@ -25,7 +69,11 @@ function createBoard() {
         square.dataset.file = String.fromCharCode(97 + col);
         square.dataset.rank = (8 - row);
         
-        square.onclick = () => handleSquareClick(square);
+        square.addEventListener('click', (e) => {
+            if (isConfirmed) {
+                handleSquareClick(square);
+            }
+        });
         boardElement.appendChild(square);
     }
 }
@@ -57,7 +105,6 @@ async function updateBoard(fromPrevious) {
     const squares = document.querySelectorAll('.square');
     flatBoard.forEach((piece, idx) => {
         squares[idx].textContent = pieceMap[piece];
-        console.log(data.is_check);
         if (piece == 'k' && data.is_check == "b") squares[idx].classList.add('check');
         else if (piece == 'K' && data.is_check == "w") squares[idx].classList.add('check');
         else squares[idx].classList.remove('check');
@@ -68,16 +115,29 @@ async function updateBoard(fromPrevious) {
     // if user won, then unlock next level
     if (data.is_game_over && data.turn == "b") {
         unlockNextLevel();
-
-        // Re-generate the grid so the newly unlocked level opens up right away
         populateLevels(NUM_LEVELS); 
 
-        // send to game over screen, then reset game
-        gameOverScreen(true);
-        resetGame();
+        const activeLevelBtn = document.querySelector('.level-btn.active');
+        const currentLevel = activeLevelBtn ? activeLevelBtn.textContent : "1";
+        const selectedDifficulty = document.getElementById("engineSelect").value;
+        const activeModCount = document.querySelectorAll('.console-btn.active-toggle').length;
+        const extraPieceActive = (typeof extraPieceSelected !== 'undefined' && extraPieceSelected !== 'none');
+
+        if (selectedDifficulty === "1" && extraPieceActive) {
+            localStorage.setItem(`level_${currentLevel}_challenge_1`, "true");
+        }
+        if (selectedDifficulty === "2" && activeModCount === 0 && !extraPieceActive) {
+            localStorage.setItem(`level_${currentLevel}_challenge_2`, "true");
+        }
+        if (selectedDifficulty === "3" && extraPieceActive && activeModCount >= 1) {
+            localStorage.setItem(`level_${currentLevel}_challenge_3`, "true");
+        }
+
+        updateChallengeUI(currentLevel);
+        gameOverScreen(true, document.getElementById("engineSelect").value);
     }
-    else {
-        gameOverScreen(false);
+    else if (data.is_game_over && data.turn == "w") {
+        gameOverScreen(false, document.getElementById("engineSelect").value);
     }
 
     if (data.is_game_over) return true;
@@ -132,10 +192,7 @@ async function handleSquareClick(square) {
             selectSquare(square, new_data);
         }
         else {
-            const squares = document.querySelectorAll('.square');
-            for (let i = 0; i < 64; i++) {
-                squares[i].classList.remove('moveable');
-            }
+            resetSelectedSquares();
         }
     } else {
         selectSquare(square, data);
@@ -170,7 +227,6 @@ async function handlePromotionSelection(moveFrom, moveTo, turn) {
             if (isLegal) {
                 await sendMove(moveFrom, moveTo, choice);
                 await updateBoard(false);
-                await requestStockfishMove();
             }
         };
     });
@@ -178,9 +234,7 @@ async function handlePromotionSelection(moveFrom, moveTo, turn) {
 
 async function selectSquare(square, new_data) {
     const squares = document.querySelectorAll('.square');
-    for (let i = 0; i < 64; i++) {
-        squares[i].classList.remove('moveable');
-    }
+    resetSelectedSquares();
     if (square.textContent !== '' && checkColour(square, new_data) == true) {
         selectedSquare = square;
         square.classList.add('selected');
@@ -253,11 +307,31 @@ function checkColour(square, data) {
     }
 }
 
+function resetSelectedSquares() {
+    const squares = document.querySelectorAll('.square');
+    for (let i = 0; i < 64; i++) {
+        squares[i].classList.remove('moveable');
+    }
+    selectedSquare = null;
+}
+
+// sets up position based on level (different starting FENs)
 async function resetGame() {
+    const modal = document.getElementById('gameOverModal');
+    modal.classList.add('hidden');
+
+    const squares = document.querySelectorAll('.square');
+    for (let i = 0; i < 64; i++) {
+        squares[i].classList.remove('moveable');
+        squares[i].classList.remove('selected');
+    }
+
+    let gameFEN = startingPositions[currentLevelSelected-1];
+
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extraPiece: extraPieceSelected })
+        body: JSON.stringify({ fen: gameFEN, extraPiece: extraPieceSelected })
     });
     updateBoard(false);
 }
@@ -267,8 +341,124 @@ async function undoMove() {
     updateBoard(false);
 }
 
-function gameOverScreen(gameWin) {
-    // TODO: implement game over screen
+function confirmSettings() {
+    isConfirmed = true;
+    boardElement.classList.remove('pending-confirmation');
+
+    resetGame();
+
+    const engineSelect = document.getElementById("engineSelect");
+    if (engineSelect) engineSelect.disabled = true;
+
+    const newGame = document.getElementById("new-game");
+    if (newGame) newGame.disabled = false; 
+
+    const modifierButtons = document.querySelectorAll('.console-btn');
+    modifierButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        btn.style.cursor = "not-allowed";
+    });
+
+    document.getElementById('status').innerText = "settings locked. good luck!";
+}
+
+function releaseSettings() {
+    isConfirmed = false;
+    boardElement.classList.add('pending-confirmation');
+
+    const engineSelect = document.getElementById("engineSelect");
+    if (engineSelect) engineSelect.disabled = false;
+
+    const newGame = document.getElementById("new-game");
+    if (newGame) newGame.disabled = true; 
+
+    const modifierButtons = document.querySelectorAll('.console-btn');
+    modifierButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+    });
+}
+
+function updateChallengeUI(levelId) {
+    const challengeDescriptions = document.getElementsByClassName('challenge-desc');
+    for (let i = 0; i < 3; i++) {
+        challengeDescriptions[i].textContent = challenges[currentLevelSelected-1][i];
+    }
+    for (let c = 1; c <= 3; c++) {
+        const card = document.getElementById(`challenge-${c}`);
+        const statusText = card.querySelector('.challenge-status');
+        
+        const isCompleted = localStorage.getItem(`level_${levelId}_challenge_${c}`) === "true";
+
+        if (isCompleted) {
+            card.classList.add('completed');
+            statusText.innerText = "Completed";
+        } else {
+            card.classList.remove('completed');
+            statusText.innerText = "Locked";
+        }
+    }
+}
+
+function gameOverScreen(gameWin, difficulty) {
+    const modal = document.getElementById('gameOverModal');
+    const statusHeader = document.getElementById('modalStatus');
+    const engineDifficulty = document.getElementById('modalDifficulty');
+    const modifiersList = document.getElementById('modalModifiers');
+    
+    if (gameWin) {
+        statusHeader.innerText = "LEVEL PASSED";
+        statusHeader.className = "modal-title passed";
+    } else {
+        statusHeader.innerText = "LEVEL FAILED";
+        statusHeader.className = "modal-title failed";
+    }
+
+    switch (difficulty) {
+        case "1":
+            engineDifficulty.innerText = "intermediate";
+            break;
+        case "2":
+            engineDifficulty.innerText = "advanced";
+            break;
+        case "3":
+            engineDifficulty.innerText = "expert";
+            break;
+        default:
+            engineDifficulty.innerText = "[difficulty]";
+    }
+
+    const stars = document.querySelectorAll('.stars-container .star');
+    console.log(stars);
+    stars.forEach(star => {
+        const starRating = parseInt(star.getAttribute('data-star'));
+        if (gameWin && starRating <= difficulty) {
+            star.classList.add('lit');
+        } else {
+            star.classList.remove('lit');
+        }
+    });
+
+    modifiersList.innerHTML = "";
+    
+    const activeModifiers = document.querySelectorAll('.console-btn.active-toggle');
+    
+    if (activeModifiers.length === 0) {
+        const li = document.createElement('li');
+        li.innerText = "None (Standard Match)";
+        modifiersList.appendChild(li);
+    } else {
+        activeModifiers.forEach(modButton => {
+            const modName = modButton.getAttribute('data-tooltip') || modButton.id.replace('btn-', '');
+            const li = document.createElement('li');
+            li.innerText = modName.split('.')[0];
+            modifiersList.appendChild(li);
+        });
+    }
+
+    modal.classList.remove('hidden');
 }
 
 async function requestStockfishMove() {
@@ -320,7 +510,10 @@ function populateLevels(totalLevels) {
                 btn.classList.add('active');
                 
                 levelSelected(i);
+                updateChallengeUI(i);
                 closeLevelSelect();
+                resetGame();
+                releaseSettings();
             };
         } else {
             btn.textContent = '🔒';
@@ -363,6 +556,8 @@ function initializeGame() {
     else {
         const id = localStorage.getItem('currentLevel');
         levelSelected(id);
+        updateChallengeUI(id);
+        releaseSettings();
     }
 }
 

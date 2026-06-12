@@ -1,6 +1,22 @@
 const API_URL = 'http://127.0.0.1:5000/api';
 const NUM_LEVELS = 25;
 
+function openInstructions() {
+    document.getElementById('instructionsModal').classList.remove('hidden');
+}
+
+function closeInstructions() {
+    document.getElementById('instructionsModal').classList.add('hidden');
+}
+
+// close instructions window when clicked outside the box
+function closeInstructionsClick(event) {
+    const modalOverlay = document.getElementById('instructionsModal');
+    if (event.target === modalOverlay) {
+        closeInstructions();
+    }
+}
+
 function populateLevels(totalLevels) {
     const grid = document.getElementById('levelGrid');
     grid.innerHTML = ''; 
