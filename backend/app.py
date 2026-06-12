@@ -75,7 +75,7 @@ def get_game_state():
 def home():
     """Generates HTML webpage (home screen)"""
     global engine
-    engine.quit()
+    engine.close()
     return render_template('index.html')
 
 @app.route('/game')
@@ -131,7 +131,6 @@ def check_move():
         legal_uci_strings = [move.uci() for move in board.legal_moves]
         # check if the move is among legal moves
         if uci_move in legal_uci_strings:
-            print("hello")
             return jsonify({"success": True})
         else:
             return jsonify({"success": False})
@@ -164,23 +163,29 @@ def stockfish_move():
 @app.route('/api/reset', methods=['POST'])
 def reset():
     data = request.json
-    extra_piece = data.get('extraPiece') # check in case of piece add modifier
-
-    if extra_piece is None:
-        fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    else:
-        location = random.randint(0,7) # put location of piece
-        if location == 0:
-            fen = "rnbqkbnr/pppppppp/8/8/8/" + extra_piece + "7/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        elif location == 7:
-            fen = "rnbqkbnr/pppppppp/8/8/8/7" + extra_piece + "/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        else:
-            fen = "rnbqkbnr/pppppppp/8/8/8/" + str(location) + extra_piece + str(7-location) + "/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-    print(fen)
+    fen = data.get('fen') # setup position based on FEN 
+    extra_piece = data.get('extraPiece')
 
     global board
+    board.reset()
     board = chess.Board(fen)
+
+    if extra_piece is not None:
+        location = random.randint(0,7) # put location of piece
+        target_square = chess.square(location, 2) # 3rd rank
+        if extra_piece == 'Q':
+            piece = chess.Piece(chess.QUEEN, chess.WHITE)
+        elif extra_piece == 'R':
+            piece = chess.Piece(chess.ROOK, chess.WHITE)
+        elif extra_piece == 'B':
+            piece = chess.Piece(chess.BISHOP, chess.WHITE)
+        elif extra_piece == 'N':
+            piece = chess.Piece(chess.KNIGHT, chess.WHITE)
+        else:
+            piece = chess.Piece(chess.PAWN, chess.WHITE)
+        
+        board.set_piece_at(target_square, piece)
+
     return jsonify(get_game_state())
 
 @app.route('/api/undo', methods=['POST'])
