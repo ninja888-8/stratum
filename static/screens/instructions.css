@@ -1,0 +1,80 @@
+.modal-content.large {
+    max-width: 550px;
+    width: 90%;
+    position: relative;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+}
+
+.modal-header {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin: 0 0 10px 0;
+    text-align: left;
+    color: #000000;
+}
+
+.modal-body-scroll {
+    overflow-y: auto;
+    text-align: left;
+    padding-right: 12px;
+    margin: 15px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.instruction-img-container {
+    background-color: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.instruction-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 2px;
+    display: block;
+    margin: 0 auto;
+}
+
+.img-caption {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 8px 0 0 0 !important;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 1.8rem;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.close-modal-btn:hover {
+    color: #fff;
+}
+
+.modal-close-action-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #eee;
+    border-radius: 4px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.modal-close-action-btn:hover {
+    background-color: #333;
+    color: #fff;
+}

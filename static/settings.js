@@ -99,7 +99,10 @@ function closeLevelSelect() {
 function levelSelected(id) {
     localStorage.setItem('currentLevel', id);
 
-    document.getElementById("level-number").textContent = "Level " + id;
+    levelNumberHeader = document.getElementById("level-number");
+    if (levelNumberHeader)
+        levelNumberHeader.textContent = "Level " + id;
+    
     currentLevelSelected = id;
 }
 
@@ -139,6 +142,19 @@ async function difficultySelected() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ elo: stockfish_elo }) // passes chosen level to change difficulty of stockfish
     });
+}
+
+function resetModifiers() {
+    difficultyMultiplier = 1;
+    const buttons = document.querySelectorAll(".console-btn");
+    
+    buttons.forEach(btn => {
+        btn.classList.remove('active-toggle');
+        btn.classList.remove('btn-locked');
+        btn.disabled = false;
+    });
+    
+    extraPieceSelected = null;
 }
 
 // initializing functionality of modifier buttons

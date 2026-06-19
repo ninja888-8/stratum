@@ -1,0 +1,103 @@
+/* settings override other body */
+.menu-body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0b0b0b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+}
+
+.menu-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 640px;
+    padding: 40px;
+    animation: menuFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 6px;
+}
+
+.game-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.decorator {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: #3f3f46;
+    user-select: none;
+}
+
+.menu-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+.menu-btn {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.menu-btn.primary-btn {
+    background-color: #ffffff;
+    border: 1px solid #ffffff;
+    color: #09090b;
+}
+
+.menu-btn.primary-btn:hover {
+    background-color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.12);
+}
+
+.menu-btn.secondary-btn {
+    background-color: #141416;
+    border: 1px solid #27272a;
+    color: #a1a1aa;
+}
+
+.menu-btn.secondary-btn:hover {
+    color: #ffffff;
+    background-color: #1c1c1f;
+    border-color: #52525b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.menu-btn:active {
+    transform: translateY(1px);
+}
+
+@keyframes menuFadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

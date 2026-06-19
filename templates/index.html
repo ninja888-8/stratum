@@ -6,91 +6,117 @@
     <title>stratum</title>
     <link rel="stylesheet" href="/static/main.css">
 </head>
-<body>
+<body class="menu-body">
 
-<div class="menu">
-    <div class="sidebar">
-        <div>
-            <h2>> stratum <</h2>
-        </div>
+<div class="menu-container">
+    <header class="menu-header">
+        <span class="decorator">&gt;</span>
+        <h1 class="game-title">stratum</h1>
+        <span class="decorator">&lt;</span>
+    </header>
+
+    <section class="dashboard-metrics">
         
-        <div class="controls">
-            <button onclick="openInstructions()">Instructions</button>
-            <button onclick="openSettings()">Settings</button>
-            <button onclick="openLevelSelect()">Level Select</button>
+        <div class="metric-row">
+            <span class="metric-label">GAME PROGRESS</span>
+            <span class="metric-value" id="progress-text">0%</span>
         </div>
-    </div>
+        <div class="progress-track">
+            <div class="progress-bar" id="progress-bar" style="width: 0%;"></div>
+        </div>
 
-    <div id="instructionsModal" class="modal-overlay hidden" onclick="closeInstructionsClick(event)">
-        <div class="modal-content large">
-            <h2 class="modal-header">stratum</h2>
-
-            <div class="modal-body-scroll">
-                <p>single player chess (against the engine) with a small twist!?</p>
-                <p>each separate level challenges you against an increasingly difficult starting position. each level contains three difficulties:</p>
-                <ul>
-                    <li>★ (Intermediate): Roughly 1320 elo</li>
-                    <li>★★ (Advanced): Roughly 1800 elo.</li>
-                    <li>★★★ (Expert): Roughly 2200 elo.</li>
-                </ul>
-                <p>either draw or win the game to succeed!</p>
-
-                <p>seems difficult? keep in mind that there are difficulty modifiers implemented in game</p>
-                <div class="instruction-img-container">
-                    <img src="static/images/modifiers.png" class="instruction-img">
-                    <p class="img-caption">Use the side console to toggle game modifiers before clicking into the match</p>
-                </div>
-
-                <p>challenges listed under each level require the specific difficulty and modifiers active, in any run</p>
-                <div class="instruction-img-container">
-                    <img src="static/images/challenges.png" class="instruction-img">
-                    <p class="img-caption">Meet challenge requirements and pass the level to earn the challenge star</p>
-                </div>
-
-                <hr class="modal-divider">
-                <button class="modal-close-action-btn" onclick="closeInstructions()">close</button>
+        <div class="metric-grid">
+            <div class="metric-box">
+                <span class="box-label">CURRENT LEVEL</span>
+                <span class="box-value" id="level-indicator">1 / 25</span>
+            </div>
+            <div class="metric-box">
+                <span class="box-label">DIFFICULTY STARS SECURED</span>
+                <span class="box-value" id="difficulty-star-indicator">★ 00</span>
+            </div>
+            <div class="metric-box">
+                <span class="box-label">CHALLENGE STARS SECURED</span>
+                <span class="box-value" id="challenge-star-indicator">★ 00</span>
             </div>
         </div>
-    </div>    
+    </section>
+    
+    <div class="menu-controls">
+        <button class="menu-btn primary-btn" onclick="openInstructions()">Instructions</button>
+        <button class="menu-btn secondary-btn" onclick="openSettings()">Settings</button>
+        <button class="menu-btn secondary-btn" onclick="openLevelSelect()">Level Select</button>
+    </div>
+</div>
 
-    <!-- settings menu -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
-    <div id="settingsSidebar" class="settings-sidebar">
-        <div class="sidebar-header">
-            <h3>Game Settings</h3>
-            <button class="close-sidebar-btn" onclick="closeSettings()">×</button>
-        </div>
-        
-        <!-- specific settings -->
-        <!-- TODO: add more themes -->
-        <div class="setting-item">
-            <label for="themeSelect">Board Theme:</label>
-            <select id="boardThemeSelect" onchange="boardThemeSelected()">
-                <option value="classic">Classic Wood</option>
-                <option value="green">Tournament Green</option>
-                <option value="blue">Ocean Blue</option>
-            </select>
+<div id="instructionsModal" class="modal-overlay hidden" onclick="closeInstructionsClick(event)">
+    <div class="modal-content large">
+        <h2 class="modal-header">stratum</h2>
 
-            <label for="themeSelect">Board Pieces:</label>
-            <select id="pieceThemeSelect" onchange="pieceThemeSelected()">
-                <option value="text">Classic Text</option>
-                <option value="modern">Modern</option>
-            </select>
+        <div class="modal-body-scroll">
+            <p>single player chess (against the engine) with a small twist!?</p>
+            <p>each separate level challenges you against an increasingly difficult starting position. each level contains three difficulties:</p>
+            <ul>
+                <li>★ (Intermediate): Roughly 1320 elo</li>
+                <li>★★ (Advanced): Roughly 1800 elo.</li>
+                <li>★★★ (Expert): Roughly 2200 elo.</li>
+            </ul>
+            <p>either draw or win the game to succeed!</p>
+
+            <p>seems difficult? keep in mind that there are difficulty modifiers implemented in game</p>
+            <div class="instruction-img-container">
+                <img src="static/images/modifiers.png" class="instruction-img">
+                <p class="img-caption">Use the side console to toggle game modifiers before clicking into the match</p>
+            </div>
+
+            <p>challenges listed under each level require the specific difficulty and modifiers active, in any run</p>
+            <div class="instruction-img-container">
+                <img src="static/images/challenges.png" class="instruction-img">
+                <p class="img-caption">Meet challenge requirements and pass the level to earn the challenge star</p>
+            </div>
+
+            <hr class="modal-divider">
+            <button class="modal-close-action-btn" onclick="closeInstructions()">close</button>
         </div>
     </div>
+</div>    
 
-    <!-- level select menu -->
-    <div id="levelOverlay" class="sidebar-overlay" onclick="closeLevelSelect()"></div>
-    <div id="levelSidebar" class="settings-sidebar">
-        <div class="sidebar-header">
-            <h3>Select Level</h3>
-            <button class="close-sidebar-btn" onclick="closeLevelSelect()">×</button>
-        </div>
-        
-        <div class="level-container">
-            <div id="levelGrid" class="level-grid">
-                <!-- buttons added through Javascript -->
-            </div>
+<!-- settings menu -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
+<div id="settingsSidebar" class="settings-sidebar">
+    <div class="sidebar-header">
+        <h3>Game Settings</h3>
+        <button class="close-sidebar-btn" onclick="closeSettings()">×</button>
+    </div>
+    
+    <!-- specific settings -->
+    <!-- TODO: add more themes -->
+    <div class="setting-item">
+        <label class="theme-select">Board Theme:</label>
+        <select id="boardThemeSelect" onchange="boardThemeSelected()">
+            <option value="classic">Classic Wood</option>
+            <option value="green">Tournament Green</option>
+            <option value="blue">Ocean Blue</option>
+        </select>
+
+        <label class="theme-select">Board Pieces:</label>
+        <select id="pieceThemeSelect" onchange="pieceThemeSelected()">
+            <option value="text">Classic Text</option>
+            <option value="modern">Modern</option>
+        </select>
+    </div>
+</div>
+
+<!-- level select menu -->
+<div id="levelOverlay" class="sidebar-overlay" onclick="closeLevelSelect()"></div>
+<div id="levelSidebar" class="settings-sidebar">
+    <div class="sidebar-header">
+        <h3>Select Level</h3>
+        <button class="close-sidebar-btn" onclick="closeLevelSelect()">×</button>
+    </div>
+    
+    <div class="level-container">
+        <div id="levelGrid" class="level-grid">
+            <!-- buttons added through Javascript -->
         </div>
     </div>
 </div>

@@ -116,24 +116,8 @@ async function updateBoard(fromPrevious) {
     if (data.is_game_over && data.turn == "b") {
         unlockNextLevel();
         populateLevels(NUM_LEVELS); 
-
-        const activeLevelBtn = document.querySelector('.level-btn.active');
-        const currentLevel = activeLevelBtn ? activeLevelBtn.textContent : "1";
-        const selectedDifficulty = document.getElementById("engineSelect").value;
-        const activeModCount = document.querySelectorAll('.console-btn.active-toggle').length;
-        const extraPieceActive = (typeof extraPieceSelected !== 'undefined' && extraPieceSelected !== 'none');
-
-        if (selectedDifficulty === "1" && extraPieceActive) {
-            localStorage.setItem(`level_${currentLevel}_challenge_1`, "true");
-        }
-        if (selectedDifficulty === "2" && activeModCount === 0 && !extraPieceActive) {
-            localStorage.setItem(`level_${currentLevel}_challenge_2`, "true");
-        }
-        if (selectedDifficulty === "3" && extraPieceActive && activeModCount >= 1) {
-            localStorage.setItem(`level_${currentLevel}_challenge_3`, "true");
-        }
-
-        updateChallengeUI(currentLevel);
+        updateCompletions();
+        updateChallengeUI(currentLevelSelected);
         gameOverScreen(true, document.getElementById("engineSelect").value);
     }
     else if (data.is_game_over && data.turn == "w") {
@@ -359,8 +343,6 @@ function confirmSettings() {
         btn.style.opacity = "0.7";
         btn.style.cursor = "not-allowed";
     });
-
-    document.getElementById('status').innerText = "settings locked. good luck!";
 }
 
 function releaseSettings() {
@@ -400,6 +382,39 @@ function updateChallengeUI(levelId) {
             statusText.innerText = "Locked";
         }
     }
+}
+
+function updateCompletions() {
+    const currentLevel = currentLevelSelected;
+    const selectedDifficulty = document.getElementById("engineSelect").value;
+    const activeModCount = document.querySelectorAll('.console-btn.active-toggle').length;
+    const extraPieceActive = (typeof extraPieceSelected !== 'undefined' && extraPieceSelected !== 'none');
+
+    let completedChallenges = 0;
+    if (selectedDifficulty === "1" && extraPieceActive && !localStorage.getItem(`level_${currentLevel}_challenge_1`)) {
+        localStorage.setItem(`level_${currentLevel}_challenge_1`, "true");
+        completedChallenges++;
+    }
+    if (selectedDifficulty === "2" && activeModCount === 0 && !extraPieceActive && !localStorage.getItem(`level_${currentLevel}_challenge_2`)) {
+        localStorage.setItem(`level_${currentLevel}_challenge_2`, "true");
+        completedChallenges++;
+    }
+    if (selectedDifficulty === "3" && extraPieceActive && activeModCount >= 1 && !localStorage.getItem(`level_${currentLevel}_challenge_3`)) {
+        localStorage.setItem(`level_${currentLevel}_challenge_3`, "true");
+        completedChallenges++;
+    }
+
+    localStorage.setItem('challengeStarsEarned', parseInt(localStorage.getItem('challengeStarsEarned'))+completedChallenges);
+
+    let difficultyStarsEarned = parseInt(localStorage.getItem("difficultyStarsEarned"));
+    const difficultyStars = JSON.parse(localStorage.getItem("difficultyStarsArray"));
+    if (difficultyStars[currentLevel-1] < parseInt(selectedDifficulty)) {
+        difficultyStarsEarned += parseInt(selectedDifficulty) - difficultyStars[currentLevel-1];
+        difficultyStars[currentLevel-1] = parseInt(selectedDifficulty);
+    }
+    
+    localStorage.setItem('difficultyStarsEarned', difficultyStarsEarned);
+    localStorage.setItem('difficultyStarsArray', JSON.stringify(difficultyStars));
 }
 
 function gameOverScreen(gameWin, difficulty) {
@@ -467,7 +482,7 @@ async function requestStockfishMove() {
     const currentLevel = activeLevelBtn ? parseInt(activeLevelBtn.textContent) : 1;
 
     try {
-        // update status text so user knows Stockfish is thinking
+        // update status text so user knows Stockfish is thinking if doesnt happen immediately
         document.getElementById('status').innerText = "Stockfish is thinking...";
 
         const response = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
@@ -533,8 +548,17 @@ function initializeGame() {
     if (!localStorage.getItem('selectedBoardTheme')) {
         localStorage.setItem('selectedBoardTheme', 'classic');
     }
-    if (!localStorage.getItem('SelectedPieceTheme')) {
+    if (!localStorage.getItem('selectedPieceTheme')) {
         localStorage.setItem('selectedPieceTheme', 'text');
+    }
+    if (!localStorage.getItem('difficultyStarsEarned')) {
+        localStorage.setItem('difficultyStarsEarned', '0');
+    }
+    if (!localStorage.getItem('challengeStarsEarned')) {
+        localStorage.setItem('challengeStarsEarned', '0');
+    }
+    if (!localStorage.getItem('difficultyStarsArray')) {
+        localStorage.setItem('difficultyStarsArray', JSON.stringify(Array(NUM_LEVELS).fill(0)));
     }
 
     let newGame = true;
@@ -554,7 +578,7 @@ function initializeGame() {
         localStorage.setItem('currentLevel', '0');
     }
     else {
-        const id = localStorage.getItem('currentLevel');
+        const id = parseInt(localStorage.getItem('currentLevel'));
         levelSelected(id);
         updateChallengeUI(id);
         releaseSettings();

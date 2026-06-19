@@ -21,23 +21,23 @@
             <!-- Row 1: Buffs (Green) -->
             <div class="console-row">
                 <button id="btn-1" class="console-btn btn-green" data-tooltip="Start with an extra Queen." data-id=1>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/gain_queen.png" class="btn-icon">
                 </button>
                 <button id="btn-2" class="console-btn btn-green" data-tooltip="Start with an extra Rook." data-id=2>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/gain_rook.png" class="btn-icon">
                 </button>
                 <button id="btn-3" class="console-btn btn-green" data-tooltip="Start with an extra Bishop." data-id=3>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/gain_bishop.png" class="btn-icon">
                 </button>
                 <button id="btn-4" class="console-btn btn-green" data-tooltip="Start with an extra Knight." data-id=4>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/gain_knight.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 2: Buffs (Green) -->
             <div class="console-row">
                 <button id="btn-5" class="console-btn btn-green" data-tooltip="Start with an extra Pawn." data-id=5>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/gain_pawn.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-green" data-tooltip="Start with one extra move." data-id=6>
                     <img src="/static/images/temp.png" class="btn-icon">
@@ -239,8 +239,8 @@
         </div>
 
         <div class="modal-actions">
-            <button class="modal-btn primary-btn" onclick="resetGame()">Play Again</button>
-            <button class="modal-btn secondary-btn" onclick="selectNextLevel(); resetGame();">Next Level</button>
+            <button class="modal-btn primary-btn" onclick="resetGame(); releaseSettings();">Play Again</button>
+            <button class="modal-btn secondary-btn" onclick="selectNextLevel(); resetModifiers(); resetGame(); releaseSettings();">Next Level</button>
         </div>
     </div>
 </div>

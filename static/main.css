@@ -3,11 +3,13 @@
 @import 'components/difficulty-selection.css';
 @import 'components/home-button.css';
 @import 'components/level-description.css';
-@import 'mechanics/promotion.css';
+@import 'components/metrics.css';
+@import 'screens/promotion.css';
 @import 'screens/gameover.css';
 @import 'screens/instructions.css';
-@import 'settings/levels.css';
-@import 'settings/settings.css';
+@import 'screens/menu.css';
+@import 'sidebar/levels.css';
+@import 'sidebar/settings.css';
 
 :root {
     --bg-color: #2c3e50;
@@ -30,17 +32,6 @@ body {
 .container {
     display: flex;
     background: var(--sidebar-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    gap: 20px;
-}
-
-.menu {
-    display: fixed;
-    background: var(--sidebar-bg);
-    width: 50%;
-    height: 50%;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
