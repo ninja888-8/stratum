@@ -42,13 +42,13 @@
     </section>
     
     <div class="menu-controls">
-        <button class="menu-btn primary-btn" onclick="openInstructions()">Instructions</button>
-        <button class="menu-btn secondary-btn" onclick="openSettings()">Settings</button>
-        <button class="menu-btn secondary-btn" onclick="openLevelSelect()">Level Select</button>
+        <button class="menu-btn primary-btn" id="instructions-btn">Instructions</button>
+        <button class="menu-btn secondary-btn" id="settings-btn">Settings</button>
+        <button class="menu-btn secondary-btn" id="level-select-btn">Level Select</button>
     </div>
 </div>
 
-<div id="instructionsModal" class="modal-overlay hidden" onclick="closeInstructionsClick(event)">
+<div id="instructionsModal" class="modal-overlay hidden">
     <div class="modal-content large">
         <h2 class="modal-header">stratum</h2>
 
@@ -75,31 +75,31 @@
             </div>
 
             <hr class="modal-divider">
-            <button class="modal-close-action-btn" onclick="closeInstructions()">close</button>
+            <button class="modal-close-action-btn" id="close-instructions-btn">close</button>
         </div>
     </div>
 </div>    
 
 <!-- settings menu -->
-<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
 <div id="settingsSidebar" class="settings-sidebar">
     <div class="sidebar-header">
         <h3>Game Settings</h3>
-        <button class="close-sidebar-btn" onclick="closeSettings()">×</button>
+        <button class="close-sidebar-btn" id="close-settings-btn">×</button>
     </div>
     
     <!-- specific settings -->
     <!-- TODO: add more themes -->
     <div class="setting-item">
         <label class="theme-select">Board Theme:</label>
-        <select id="boardThemeSelect" onchange="boardThemeSelected()">
+        <select id="boardThemeSelect">
             <option value="classic">Classic Wood</option>
             <option value="green">Tournament Green</option>
             <option value="blue">Ocean Blue</option>
         </select>
 
         <label class="theme-select">Board Pieces:</label>
-        <select id="pieceThemeSelect" onchange="pieceThemeSelected()">
+        <select id="pieceThemeSelect">
             <option value="text">Classic Text</option>
             <option value="modern">Modern</option>
         </select>
@@ -107,11 +107,11 @@
 </div>
 
 <!-- level select menu -->
-<div id="levelOverlay" class="sidebar-overlay" onclick="closeLevelSelect()"></div>
+<div id="levelOverlay" class="sidebar-overlay"></div>
 <div id="levelSidebar" class="settings-sidebar">
     <div class="sidebar-header">
         <h3>Select Level</h3>
-        <button class="close-sidebar-btn" onclick="closeLevelSelect()">×</button>
+        <button class="close-sidebar-btn" id="close-level-btn">×</button>
     </div>
     
     <div class="level-container">
@@ -121,8 +121,7 @@
     </div>
 </div>
 
-<script src="/static/settings.js"></script>
-<script src="/static/home.js"></script>
+<script type="module" src="static/menu.js"></script>
 
 </body>
 </html>

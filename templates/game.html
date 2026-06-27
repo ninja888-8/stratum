@@ -103,7 +103,7 @@
             <h3 id="level-number">Level [id]</h3>
             <div class="setting-item">
                 <label for="engineSelect">Engine Difficulty:</label>
-                <select id="engineSelect" onchange="difficultySelected()">
+                <select id="engineSelect">
                     <option value="1">Intermediate (1320) ⭐</option>
                     <option value="2">Advanced (1800) ⭐⭐</option>
                     <option value="3">Expert (2200) ⭐⭐⭐</option>
@@ -152,10 +152,10 @@
         </div>
         
         <div class="controls">
-            <button id="new-game" onclick="resetGame(); releaseSettings();">New Game</button>
-            <button onclick="undoMove(); undoMove();">Undo</button>
-            <button onclick="openSettings()">Settings</button>
-            <button onclick="openLevelSelect()">Level Select</button>
+            <button id="new-game">New Game</button>
+            <button id="undo-btn">Undo</button>
+            <button id="settings-btn">Settings</button>
+            <button id="level-select-btn">Level Select</button>
         </div>
     </div>
 
@@ -173,25 +173,25 @@
     </div>
 
     <<!-- settings menu -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSettings()"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
     <div id="settingsSidebar" class="settings-sidebar">
         <div class="sidebar-header">
             <h3>Game Settings</h3>
-            <button class="close-sidebar-btn" onclick="closeSettings()">×</button>
+            <button class="close-sidebar-btn" id="close-settings-btn">×</button>
         </div>
         
         <!-- specific settings -->
         <!-- TODO: add more themes -->
         <div class="setting-item">
             <label for="themeSelect">Board Theme:</label>
-            <select id="boardThemeSelect" onchange="boardThemeSelected()">
+            <select id="boardThemeSelect">
                 <option value="classic">Classic Wood</option>
                 <option value="green">Tournament Green</option>
                 <option value="blue">Ocean Blue</option>
             </select>
 
             <label for="themeSelect">Board Pieces:</label>
-            <select id="pieceThemeSelect" onchange="pieceThemeSelected()">
+            <select id="pieceThemeSelect">
                 <option value="text">Classic Text</option>
                 <option value="modern">Modern</option>
             </select>
@@ -199,11 +199,11 @@
     </div>
 
     <!-- level select menu -->
-    <div id="levelOverlay" class="sidebar-overlay" onclick="closeLevelSelect()"></div>
+    <div id="levelOverlay" class="sidebar-overlay"></div>
     <div id="levelSidebar" class="settings-sidebar">
         <div class="sidebar-header">
             <h3>Select Level</h3>
-            <button class="close-sidebar-btn" onclick="closeLevelSelect()">×</button>
+            <button class="close-sidebar-btn" id="close-level-btn">×</button>
         </div>
         
         <div class="level-container">
@@ -239,21 +239,20 @@
         </div>
 
         <div class="modal-actions">
-            <button class="modal-btn primary-btn" onclick="resetGame(); releaseSettings();">Play Again</button>
-            <button class="modal-btn secondary-btn" onclick="selectNextLevel(); resetModifiers(); resetGame(); releaseSettings();">Next Level</button>
+            <button class="modal-btn primary-btn" id="play-again-btn">Play Again</button>
+            <button class="modal-btn secondary-btn" id="next-level-btn">Next Level</button>
         </div>
     </div>
 </div>
 
 <!-- buttons in bottom right -->
-<button class="home-btn" onclick="window.location.href='/'" data-tooltip="Return to main menu">
+<button class="home-btn" id="home-btn" data-tooltip="Return to main menu">
     <span class="btn-content-wrapper">
         <img src="/static/images/home-icon.png" alt="Home" class="btn-icon">
     </span>
 </button>
 
-<script src="/static/settings.js"></script>
-<script src="/static/script.js"></script>
+<script type="module" src="static/game.js"></script>
 
 </body>
 </html>
