@@ -86,6 +86,7 @@ async function updateBoard(fromPreviousFEN = false) {
     });
 
     document.getElementById('status').innerText = data.status_text;
+    const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
 
     if (data.is_game_over) {
         const playerWon = data.turn === 'b';
@@ -98,8 +99,23 @@ async function updateBoard(fromPreviousFEN = false) {
         showGameOverModal(playerWon, document.getElementById('engineSelect').value);
         return true;
     }
-
-    return false;
+    else {
+        // check if due to modifier, is stalemate or checkmate
+        for (let i = 0; i < legalMoves.length; i++) {
+            let file = legalMoves[i].charCodeAt(0) - "a".charCodeAt(0);
+            let rank = parseInt(legalMoves[i][1]);
+            if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false;
+        }
+        const playerWon = data.is_check != "w";
+        if (playerWon) {
+            unlockNextLevel();
+            populateLevelGrid(_gameLevelClickHandler);
+            _recordCompletions();
+            updateChallengePanel(currentLevel);
+        }
+        showGameOverModal(playerWon, document.getElementById('engineSelect').value);
+        return true;
+    }
 }
 
 async function handleSquareClick(square) {
@@ -217,24 +233,19 @@ function _isOpponentPiece(square, gameState) {
     return square.textContent !== '' && !_isCurrentPlayerPiece(square, gameState);
 }
 
-/**
- * Enters "remove piece" mode: highlights all enemy pieces and waits for a click.
- */
+/** highlights all enemy pieces and waits for a click to remove the piece */
 function _enterRemovePieceMode() {
     removePieceMode = true;
     _setStatus('Click an opponent piece to remove it from the game.');
  
-    // Highlight all enemy (black) pieces so the player knows what's clickable
+    // highlight all non-king opponent pieces
     document.querySelectorAll('.square').forEach(sq => {
         const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♟']);
         if (blackUnicode.has(sq.textContent)) sq.classList.add('moveable');
     });
 }
 
-/**
- * Called when the player clicks a square while in remove-piece mode.
- * Sends the removal to the backend then updates the board.
- */
+/** called when the player clicks a square while removing a piece */
 async function _handleSquareRemoveClick(square) {
     const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♚', '♟']);
  
@@ -257,7 +268,13 @@ async function _handleSquareRemoveClick(square) {
     });
  
     await updateBoard(false);
-    _setStatus("Piece removed. Your turn.");
+    _setStatus("piece removed! stockfish turn!");
+
+    await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+    await updateBoard(false);
+
+    await _requestStockfishMove();
+    await updateBoard();
 }
 
 async function _checkLegalMove(from, to, promotion) {
@@ -281,9 +298,9 @@ async function _sendMove(from, to, promotion) {
     if (extraPlayerMoves > 0) {
         useExtraPlayerMoves();
         if (extraPlayerMoves > 0) {
-            _setStatus(`Bonus move! ${extraPlayerMoves} extra move(s) remaining.`);
+            _setStatus(`bonus move! ${extraPlayerMoves} extra move(s) remaining.`);
         } else {
-            _setStatus("Last bonus move used. Stockfish will now respond.");
+            _setStatus("last bonus move used.");
         }
         await fetch(`${API_URL}/skip_move`, { method: 'POST' });
         await updateBoard(false);
@@ -379,13 +396,13 @@ async function resetGame() {
  
     // modifier 15: engine fires extra moves at the start before the player goes
     if (extraEngineMoves > 0) {
-        _setStatus(`Engine is making ${extraEngineMoves} opening move(s)...`);
+        _setStatus(`stockfish is making ${extraEngineMoves} opening move(s)...`);
         await _requestStockfishMove(extraEngineMoves);
     }
  
     // modifier 6: inform player of their bonus moves
     if (extraPlayerMoves > 0) {
-        _setStatus(`You have ${extraPlayerMoves} free move(s) before Stockfish responds.`);
+        _setStatus(`you have ${extraPlayerMoves} free move(s) before Stockfish moves.`);
     }
 }
 
@@ -528,7 +545,9 @@ function showGameOverModal(playerWon, difficulty) {
         });
     }
 
-    if (playerWon) document.getElementById('next-level-btn').style.display = 'flex';
+    console.log(document.getElementById('next-level-btn').style.display);
+
+    if (playerWon) document.getElementById('next-level-btn').style.display = '';
     else document.getElementById('next-level-btn').style.display = 'none';
 
     modal.classList.remove('hidden');

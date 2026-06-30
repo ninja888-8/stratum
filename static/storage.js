@@ -113,6 +113,22 @@ export function setModifiersList(modifiers) {
     setInt('modifiersList', modifiers);
 }
 
+export function hasUsedUndo() {
+    return getBool('usedUndo', false);
+}
+
+export function setUsedUndo(value) {
+    setBool('usedUndo', value);
+}
+
+export function hasUsedRemovePiece() {
+    return getBool('usedRemovePiece', false);
+}
+
+export function setUsedRemovePiece(value) {
+    setBool('usedRemovePiece', value);
+}
+
 export function isInGame() {
     return getBool('inGame', false);
 }

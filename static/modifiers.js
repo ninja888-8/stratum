@@ -1,6 +1,7 @@
 import { BUFF_MULTIPLIERS, BUTTON_BLOCK_RULES, EXTRA_PIECE_BY_BUTTON, NUM_MODIFIERS, STARTING_POSITIONS } from './constants.js';
 import { setStartingFEN, currentLevel } from './levels.js';
-import { getModifierList, setModifiersList } from './storage.js';
+import { getModifierList, hasUsedUndo, hasUsedRemovePiece, 
+         setModifiersList, setUsedUndo, setUsedRemovePiece } from './storage.js';
 
 export let difficultyMultiplier = 1.0;
 export let extraPieceSelected = null;
@@ -31,6 +32,8 @@ export function useUndoButton() {
     undoButtonReleased = false;
     document.getElementById("undo-btn").disabled = true;
     document.getElementById("undo-btn").classList.add('btn-locked');
+
+    setUsedUndo(true);
 }
 
 export function useExtraPlayerMoves() {
@@ -41,6 +44,8 @@ export function useRemovePiece() {
     canRemoveOpponentPiece = false;
     document.getElementById("remove-piece-btn").disabled = true;
     document.getElementById("remove-piece-btn").classList.add('btn-locked');
+
+    setUsedRemovePiece(true);
 }
 
 export function resetModifiers() {
@@ -85,13 +90,15 @@ export function initModifiers() {
     applyButtonDisabling();
 
     // undo button specifically
-    if (!(storedModifiers & (1<<(7-1)))) {
+    if (!(storedModifiers & (1<<(7-1))) || hasUsedUndo()) {
+        undoButtonReleased = false;
         document.getElementById("undo-btn").disabled = true;
         document.getElementById("undo-btn").classList.add('btn-locked');
     }
 
     // remove piece button specifically
-    if (!(storedModifiers & (1<<(8-1)))) {
+    if (!(storedModifiers & (1<<(8-1))) || hasUsedRemovePiece()) {
+        canRemoveOpponentPiece = false;
         document.getElementById("remove-piece-btn").disabled = true;
         document.getElementById("remove-piece-btn").classList.add('btn-locked');
     }
@@ -159,11 +166,13 @@ function handleModifierToggle(id, isActive, isInitializing = false) {
     // the undo button
     if (id == 7) {
         undoButtonReleased = isActive;
+        if (!isInitializing) setUsedUndo(!isActive);
     }
 
     // player can remove one piece from opponent position
     if (id == 8) {
         canRemoveOpponentPiece = isActive;
+        if (!isInitializing) setUsedRemovePiece(!isActive);
     }
 
     // scramble first rank
