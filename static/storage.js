@@ -105,6 +105,14 @@ export function setPieceTheme(theme) {
     setString('selectedPieceTheme', theme);
 }
 
+export function getModifierList() {
+    return getInt('modifiersList', 0);
+}
+
+export function setModifiersList(modifiers) {
+    setInt('modifiersList', modifiers);
+}
+
 export function isInGame() {
     return getBool('inGame', false);
 }

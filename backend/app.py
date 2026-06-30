@@ -116,6 +116,21 @@ def make_move():
     except ValueError:
         # Catch invalid UCI formats
         return jsonify({"success": False, "state": get_game_state()})
+
+@app.route('/api/skip_move', methods=['POST'])
+def skip_move():
+    board.push(chess.Move.null())
+    return jsonify({"success": True})
+
+@app.route('/api/remove_piece', methods=['POST'])
+def remove_piece():
+    data = request.json
+    square = data.get('square')
+    try:
+        board.remove_piece_at(chess.parse_square(square))
+        return jsonify({"success": True})
+    except ValueError:
+        return jsonify({"success": False})
     
 @app.route('/api/check', methods=['POST'])
 def check_move():
@@ -192,7 +207,9 @@ def reset():
 def undo():
     if len(board.move_stack) > 0:
         board.pop()
-    return jsonify(get_game_state())
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

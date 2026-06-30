@@ -1,6 +1,13 @@
 export const API_URL = 'http://127.0.0.1:5000/api';
 export const NUM_LEVELS = 25;
-export const BUFF_MULTIPLIERS = [0.5, 0.5, 0.6, 0.6, 0.8, 0.8, 0.9, 0.9]; // TODO: add difficulty modifiers for red modifiers as well
+export const NUM_MODIFIERS = 20;
+
+export const BUFF_MULTIPLIERS = [
+    0.5, 0.5, 0.6, 0.6, 0.8, 0.8, 0.9, 0.9,
+    1.0, 1.0, 1.0, 1.0,
+    1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2,
+]; // TODO: tune the values later
+
 export const BUTTON_BLOCK_RULES = ['btn-1', 'btn-2', 'btn-3', 'btn-4', 'btn-5'];
 
 export const PIECE_MAP = {

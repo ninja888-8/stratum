@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
-
+<script>/*fix*/</script>
 <div class="container">
     <div class="game-wrapper">
         
@@ -40,61 +40,61 @@
                     <img src="/static/images/gain_pawn.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-green" data-tooltip="Start with one extra move." data-id=6>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/extra_move.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-green" data-tooltip="Gain undo-move button." data-id=7>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/undo_move.png" class="btn-icon">
                 </button>
                 <button class="console-btn btn-green" data-tooltip="Remove any opponent piece (excluding King)." data-id=8>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                    <img src="/static/images/remove_opponent_piece.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 3: Neutral Effects (Yellow) -->
             <div class="console-row">
-                <button class="console-btn btn-yellow" data-tooltip="Both sides have their first rank pieces randomized.">
+                <button class="console-btn btn-yellow" data-tooltip="Both sides have their first rank pieces randomized." data-id=9>
+                    <img src="/static/images/swap_rank.png" class="btn-icon">
+                </button>
+                <button class="console-btn btn-yellow" data-tooltip="Start with one extra move." data-id=10>
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Start with one extra move.">
+                <button class="console-btn btn-yellow" data-tooltip="Gain undo-move button once." data-id=11>
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Gain undo-move button.">
-                    <img src="/static/images/temp.png" class="btn-icon">
-                </button>
-                <button class="console-btn btn-yellow" data-tooltip="Remove any opponent piece (excluding King).">
+                <button class="console-btn btn-yellow" data-tooltip="Remove any opponent piece (excluding King)." data-id=12>
                     <img src="/static/images/temp.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 4: Debuffs (Red) -->
             <div class="console-row">
-                <button class="console-btn btn-red" data-tooltip="Your Queen(s) cannot move.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your Queen(s) cannot move." data-id=13>
+                    <img src="/static/images/cannot_move_queen.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Rook(s) cannot move.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your Rook(s) cannot move." data-id=14>
+                    <img src="/static/images/cannot_move_rook.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Bishop(s) cannot move.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your Bishop(s) cannot move." data-id=15>
+                    <img src="/static/images/cannot_move_bishop.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Knight(s) cannot move.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your Knight(s) cannot move." data-id=16>
+                    <img src="/static/images/cannot_move_knight.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 5: Debuffs (Red) -->
             <div class="console-row">
-                <button class="console-btn btn-red" data-tooltip="Your King cannot move.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your King cannot move." data-id=17>
+                    <img src="/static/images/cannot_move_king.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Pawns may only promote to pawns.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Pawns may not promote." data-id=18>
+                    <img src="/static/images/cannot_promote.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your opponent starts with two extra moves.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Your opponent starts with two extra moves." data-id=19>
+                    <img src="/static/images/opponent_gain_move.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Four of your pieces are removed at random.">
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button class="console-btn btn-red" data-tooltip="Four of your pieces are removed at random." data-id=20>
+                    <img src="/static/images/remove_four_pieces.png" class="btn-icon">
                 </button>
             </div>
         </div>
@@ -154,6 +154,7 @@
         <div class="controls">
             <button id="new-game">New Game</button>
             <button id="undo-btn">Undo</button>
+            <button id="remove-piece-btn">Remove Piece</button>
             <button id="settings-btn">Settings</button>
             <button id="level-select-btn">Level Select</button>
         </div>

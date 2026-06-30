@@ -27,6 +27,10 @@
 
 .controls button:hover { opacity: 0.9; }
 
+.controls .btn-locked {
+    background: #b4b4b48e;
+}
+
 /* dimming background after opening a sidebar */
 .sidebar-overlay {
     display: none; /* normally hidden entirely */

@@ -2,6 +2,11 @@ import { NUM_LEVELS } from './constants.js';
 import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurrentLevel } from './storage.js';
 
 export let currentLevel = 1;
+let startingFEN = '';
+
+export function setStartingFEN(fen) {
+    startingFEN = fen;
+}
 
 export function selectLevel(levelId) {
     setCurrentLevel(levelId);

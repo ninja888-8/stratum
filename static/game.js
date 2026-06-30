@@ -13,12 +13,18 @@ import {
     currentLevel, selectLevel, unlockNextLevel, goToNextLevel,
     populateLevelGrid, openLevelSidebar, closeLevelSidebar,
 } from './levels.js';
-import { initModifiers, resetModifiers, difficultyMultiplier, extraPieceSelected } from './modifiers.js';
+import { useUndoButton, useExtraPlayerMoves, useRemovePiece, 
+         initModifiers, resetModifiers, setUpModifierButtons,
+         difficultyMultiplier, extraPieceSelected, undoButtonReleased, bannedPieces, extraPlayerMoves, canRemoveOpponentPiece, scrambleFirstRank, noPromotion, extraEngineMoves, removeFourPieces,
+         applyScramble, applyRemoveFourPieces,
+} from './modifiers.js';
 import { openSettings, closeSettings, onDifficultyChange } from './settings.js';
 
 const boardElement = document.getElementById('chessboard');
 let selectedSquare = null;
 let isGameConfirmed = false;
+
+let removePieceMode = false; // modifier 8: true while awaiting opponent piece click
 
 function createBoard() {
     boardElement.innerHTML = '';
@@ -97,6 +103,13 @@ async function updateBoard(fromPreviousFEN = false) {
 }
 
 async function handleSquareClick(square) {
+    // modifier 8 remove one of the opponent's pieces
+    if (canRemoveOpponentPiece && removePieceMode) {
+        await _handleSquareRemoveClick(square);
+        useRemovePiece();
+        return;
+    }
+
     const response = await fetch(`${API_URL}/state`);
     const data = await response.json();
 
@@ -117,6 +130,13 @@ async function handleSquareClick(square) {
             (selectedSquare.textContent === '♙' && square.dataset.rank === '8');
 
         if (isPawnPromotion) {
+            if (bannedPieces.includes(selectedSquare.textContent)) return;
+
+            // modifier 18 no pawn promotion
+            if (noPromotion) {
+                return;
+            }
+
             const isLegal = await _checkLegalMove(from, to, 'q');
             if (isLegal) {
                 await _showPromotionDialog(from, to, data.turn);
@@ -125,18 +145,17 @@ async function handleSquareClick(square) {
         } else {
             const isLegal = await _checkLegalMove(from, to, '');
             if (isLegal) {
+                if (bannedPieces.includes(selectedSquare.textContent)) return;
+
                 await _sendMove(from, to, '');
                 isGameOver = await updateBoard(false);
                 _clearSelection();
             }
+            else if (_isCurrentPlayerPiece(square, data)) {
+                _clearSelection();
+                _selectSquare(square, data);
+            }
         }
-
-        const updated = await (await fetch(`${API_URL}/state`)).json();
-        selectedSquare.classList.remove('selected');
-
-        if (isGameOver) _clearSelection();
-        else await _selectSquare(square, updated);
-
     } else {
         await _selectSquare(square, data);
     }
@@ -153,6 +172,9 @@ async function _selectSquare(square, gameState) {
     selectedSquare = square;
     square.classList.add('selected');
 
+    // cannot move piece due to modifier
+    if (bannedPieces.includes(selectedSquare.textContent)) return;
+
     const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
     const squares = document.querySelectorAll('.square');
 
@@ -168,6 +190,9 @@ async function _selectSquare(square, gameState) {
         const promotionSuffix =
             (square.textContent === '♟' && rank === '1') ||
             (square.textContent === '♙' && rank === '8') ? 'q' : '';
+
+        // hide promotion as legal move if modifier 18
+        if (promotionSuffix && noPromotion) continue;
 
         if (legalMoves.includes(from + to + promotionSuffix)) {
             squares[i].classList.add('moveable');
@@ -188,6 +213,53 @@ function _isCurrentPlayerPiece(square, gameState) {
     return (gameState.turn === 'w' && isWhite) || (gameState.turn === 'b' && !isWhite);
 }
 
+function _isOpponentPiece(square, gameState) {
+    return square.textContent !== '' && !_isCurrentPlayerPiece(square, gameState);
+}
+
+/**
+ * Enters "remove piece" mode: highlights all enemy pieces and waits for a click.
+ */
+function _enterRemovePieceMode() {
+    removePieceMode = true;
+    _setStatus('Click an opponent piece to remove it from the game.');
+ 
+    // Highlight all enemy (black) pieces so the player knows what's clickable
+    document.querySelectorAll('.square').forEach(sq => {
+        const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♟']);
+        if (blackUnicode.has(sq.textContent)) sq.classList.add('moveable');
+    });
+}
+
+/**
+ * Called when the player clicks a square while in remove-piece mode.
+ * Sends the removal to the backend then updates the board.
+ */
+async function _handleSquareRemoveClick(square) {
+    const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♚', '♟']);
+ 
+    // Only allow removing actual enemy pieces (not the king)
+    if (!blackUnicode.has(square.textContent) || square.textContent === '♚') {
+        _setStatus('Select a valid opponent piece to remove (not the King).');
+        return;
+    }
+ 
+    removePieceMode = false;
+    document.querySelectorAll('.square').forEach(s => s.classList.remove('moveable'));
+ 
+    const file = square.dataset.file;
+    const rank = square.dataset.rank;
+ 
+    await fetch(`${API_URL}/remove_piece`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ square: file + rank }),
+    });
+ 
+    await updateBoard(false);
+    _setStatus("Piece removed. Your turn.");
+}
+
 async function _checkLegalMove(from, to, promotion) {
     const res = await fetch(`${API_URL}/check`, {
         method: 'POST',
@@ -204,7 +276,20 @@ async function _sendMove(from, to, promotion) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
     });
-    await _requestStockfishMove();
+    
+    // modifier 6, skip stockfish move
+    if (extraPlayerMoves > 0) {
+        useExtraPlayerMoves();
+        if (extraPlayerMoves > 0) {
+            _setStatus(`Bonus move! ${extraPlayerMoves} extra move(s) remaining.`);
+        } else {
+            _setStatus("Last bonus move used. Stockfish will now respond.");
+        }
+        await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+        await updateBoard(false);
+    } else {
+        await _requestStockfishMove();
+    }
 }
 
 async function _showPromotionDialog(from, to, turn) {
@@ -231,16 +316,42 @@ async function _showPromotionDialog(from, to, turn) {
     });
 }
 
-async function _requestStockfishMove() {
+async function _requestStockfishMove(count = 1) {
     document.getElementById('status').innerText = 'Stockfish is thinking…';
-    try {
-        const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
-        const data = await res.json();
-        if (data.success) await updateBoard(false);
-        else console.warn('Stockfish failed to move:', data.message);
-    } catch (err) {
-        console.error('Error requesting Stockfish move:', err);
+    for (let i = 0; i < count; i++) {
+        if (count > 1) {
+            await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+        }
+        try {
+            const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                const isOver = await updateBoard(false);
+                if (isOver) return;
+            }
+            else console.warn('Stockfish failed to move:', data.message);
+        } catch (err) {
+            console.error('Error requesting Stockfish move:', err);
+        }
     }
+}
+
+async function newGame() {
+    // just sets up default position, without modifiers
+    document.getElementById('gameOverModal')?.classList.add('hidden');
+
+    document.querySelectorAll('.square').forEach(s => {
+        s.classList.remove('moveable', 'selected');
+    });
+
+    const fen = STARTING_POSITIONS[currentLevel-1];
+    await fetch(`${API_URL}/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fen, extraPiece: null }),
+    });
+
+    await updateBoard(false);
 }
 
 async function resetGame() {
@@ -250,7 +361,13 @@ async function resetGame() {
         s.classList.remove('moveable', 'selected');
     });
 
-    const fen = STARTING_POSITIONS[currentLevel - 1];
+    let fen = STARTING_POSITIONS[currentLevel-1];
+
+    // modifier 9: scramble first rank
+    if (scrambleFirstRank) fen = applyScramble(fen);
+ 
+    // modifier 20: remove four white pieces
+    if (removeFourPieces) fen = applyRemoveFourPieces(fen);
 
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
@@ -259,11 +376,29 @@ async function resetGame() {
     });
 
     await updateBoard(false);
+ 
+    // modifier 15: engine fires extra moves at the start before the player goes
+    if (extraEngineMoves > 0) {
+        _setStatus(`Engine is making ${extraEngineMoves} opening move(s)...`);
+        await _requestStockfishMove(extraEngineMoves);
+    }
+ 
+    // modifier 6: inform player of their bonus moves
+    if (extraPlayerMoves > 0) {
+        _setStatus(`You have ${extraPlayerMoves} free move(s) before Stockfish responds.`);
+    }
 }
 
 async function undoMove() {
-    await fetch(`${API_URL}/undo`, { method: 'POST' });
-    await updateBoard(false);
+    if (undoButtonReleased) {
+        const response = await fetch(`${API_URL}/undo`, { method: 'POST' });
+        const data = await response.json();
+
+        await fetch(`${API_URL}/undo`, { method: 'POST' });
+        await updateBoard(false);
+        if (data.success) // successfully undid move
+            useUndoButton();
+    }
 }
 
 function confirmSettings() {
@@ -282,6 +417,8 @@ function confirmSettings() {
         btn.style.opacity = '0.7';
         btn.style.cursor  = 'not-allowed';
     });
+
+    setUpModifierButtons(); // initialize modifier buttons once everything set up
 }
 
 function releaseSettings() {
@@ -300,6 +437,10 @@ function releaseSettings() {
         btn.style.opacity = '1';
         btn.style.cursor  = 'pointer';
     });
+}
+
+function _setStatus(text) {
+    document.getElementById('status').innerText = text;
 }
 
 export function updateChallengePanel(levelId) {
@@ -387,6 +528,9 @@ function showGameOverModal(playerWon, difficulty) {
         });
     }
 
+    if (playerWon) document.getElementById('next-level-btn').style.display = 'flex';
+    else document.getElementById('next-level-btn').style.display = 'none';
+
     modal.classList.remove('hidden');
 }
 
@@ -394,7 +538,7 @@ function _gameLevelClickHandler(levelId) {
     selectLevel(levelId);
     updateChallengePanel(levelId);
     resetModifiers();
-    resetGame();
+    newGame();
     releaseSettings();
 }
 
@@ -429,13 +573,16 @@ function initGamePage() {
 
     document.getElementById('engineSelect').addEventListener('change', onDifficultyChange);
 
-    document.getElementById('new-game').addEventListener('click', () => { resetGame(); releaseSettings(); });
-    document.getElementById('undo-btn').addEventListener('click', () => { undoMove(); undoMove(); });
+    document.getElementById('new-game').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
+    document.getElementById('undo-btn').addEventListener('click', () => { undoMove(); });
 
-    document.getElementById('play-again-btn').addEventListener('click', () => { resetGame(); releaseSettings(); });
-    document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); resetGame(); releaseSettings(); });
+    document.getElementById('play-again-btn').addEventListener('click', () => { newGame(); releaseSettings(); });
+    document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
 
     document.getElementById('home-btn').addEventListener('click', () => { window.location.href = '/'; });
+
+    // modifier 8: remove-piece button
+    document.getElementById('remove-piece-btn').addEventListener('click', _enterRemovePieceMode);
 }
 
 initGamePage();
