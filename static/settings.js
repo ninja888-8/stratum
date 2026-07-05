@@ -30,9 +30,7 @@ export function closeSettings() {
  */
 export async function onDifficultyChange() {
     const select = document.getElementById('engineSelect');
-    localStorage.setItem('defaultEngineDifficulty', String(parseInt(select.value)));
-
-    const stockfish_elo = DIFFICULTY_ELO[level] ?? null;
+    const stockfish_elo = DIFFICULTY_ELO[parseInt(select.value)] ?? null;
 
     await fetch(`${API_URL}/set_elo`, {
         method: 'POST',

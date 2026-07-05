@@ -4,6 +4,10 @@ import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurre
 export let currentLevel = 1;
 let startingFEN = '';
 
+export function getStartingFEN(fen) {
+    return startingFEN;
+}
+
 export function setStartingFEN(fen) {
     startingFEN = fen;
 }
@@ -26,7 +30,8 @@ export function unlockNextLevel() {
 export function goToNextLevel() {
     const modal = document.getElementById('gameOverModal');
     if (modal) modal.classList.add('hidden');
-    selectLevel(currentLevel + 1);
+    const buttons = document.querySelectorAll('.level-btn');
+    buttons[currentLevel].click();
 }
 
 export function openLevelSidebar() {
@@ -53,6 +58,7 @@ export function populateLevelGrid(onLevelClick) {
     grid.innerHTML = '';
 
     const highestBeaten = getHighestBeatenLevel();
+    currentLevel = getCurrentLevel();
 
     for (let i = 1; i <= NUM_LEVELS; i++) {
         const btn = document.createElement('button');
@@ -81,4 +87,7 @@ export function populateLevelGrid(onLevelClick) {
 
         grid.appendChild(btn);
     }
+
+    const levels = document.querySelectorAll('.level-btn');
+    levels[currentLevel-1]?.classList.add('active');
 }

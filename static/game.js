@@ -1,4 +1,4 @@
-import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES } from './constants.js';
+import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST} from './constants.js';
 import {
     initStorage,
     isInGame, setInGame,
@@ -6,17 +6,20 @@ import {
     getChallengeStarsEarned, setChallengeStarsEarned,
     getDifficultyStarsEarned, setDifficultyStarsEarned,
     getDifficultyStarsArray, setDifficultyStarsArray,
+    getModifierList,
     isChallengeComplete, markChallengeComplete,
 } from './storage.js';
 import { initTheme, onBoardThemeChange, onPieceThemeChange } from './theme.js';
 import {
     currentLevel, selectLevel, unlockNextLevel, goToNextLevel,
     populateLevelGrid, openLevelSidebar, closeLevelSidebar,
+    getStartingFEN,
 } from './levels.js';
 import { useUndoButton, useExtraPlayerMoves, useRemovePiece, 
          initModifiers, resetModifiers, setUpModifierButtons,
-         difficultyMultiplier, extraPieceSelected, undoButtonReleased, bannedPieces, extraPlayerMoves, canRemoveOpponentPiece, scrambleFirstRank, noPromotion, extraEngineMoves, removeFourPieces,
-         applyScramble, applyRemoveFourPieces,
+         difficultyMultiplier, extraPieceSelected, undoButtonReleased, bannedPieces, extraPlayerMoves, canRemoveOpponentPiece, scrambleFirstRank, 
+         removeHalfPieces, movePiecesUp, reflectFirstRanks, noPromotion, extraEngineMoves, removeFourPieces,
+         applyScramble, applyRemovePieces, applyMovePiecesUp, applyReflectFirstRanks,
 } from './modifiers.js';
 import { openSettings, closeSettings, onDifficultyChange } from './settings.js';
 
@@ -94,7 +97,7 @@ async function updateBoard(fromPreviousFEN = false) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
             _recordCompletions();
-            updateChallengePanel(currentLevel);
+            updateChallengePanel();
         }
         showGameOverModal(playerWon, document.getElementById('engineSelect').value);
         return true;
@@ -111,7 +114,7 @@ async function updateBoard(fromPreviousFEN = false) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
             _recordCompletions();
-            updateChallengePanel(currentLevel);
+            updateChallengePanel();
         }
         showGameOverModal(playerWon, document.getElementById('engineSelect').value);
         return true;
@@ -121,8 +124,7 @@ async function updateBoard(fromPreviousFEN = false) {
 async function handleSquareClick(square) {
     // modifier 8 remove one of the opponent's pieces
     if (canRemoveOpponentPiece && removePieceMode) {
-        await _handleSquareRemoveClick(square);
-        useRemovePiece();
+        if (await _handleSquareRemoveClick(square)) useRemovePiece();
         return;
     }
 
@@ -154,13 +156,13 @@ async function handleSquareClick(square) {
             }
 
             const isLegal = await _checkLegalMove(from, to, 'q');
-            if (isLegal) {
+            if (isLegal && square.textContent != '♚') {
                 await _showPromotionDialog(from, to, data.turn);
                 _clearSelection();
             }
         } else {
             const isLegal = await _checkLegalMove(from, to, '');
-            if (isLegal) {
+            if (isLegal && square.textContent != '♚') {
                 if (bannedPieces.includes(selectedSquare.textContent)) return;
 
                 await _sendMove(from, to, '');
@@ -210,7 +212,7 @@ async function _selectSquare(square, gameState) {
         // hide promotion as legal move if modifier 18
         if (promotionSuffix && noPromotion) continue;
 
-        if (legalMoves.includes(from + to + promotionSuffix)) {
+        if (legalMoves.includes(from + to + promotionSuffix) && squares[i].textContent != '♚') {
             squares[i].classList.add('moveable');
         }
     }
@@ -236,7 +238,7 @@ function _isOpponentPiece(square, gameState) {
 /** highlights all enemy pieces and waits for a click to remove the piece */
 function _enterRemovePieceMode() {
     removePieceMode = true;
-    _setStatus('Click an opponent piece to remove it from the game.');
+    _setStatus('Click an opponent piece to remove it from the game (takes up your turn). Click elsewhere on the board to cancel.');
  
     // highlight all non-king opponent pieces
     document.querySelectorAll('.square').forEach(sq => {
@@ -248,15 +250,14 @@ function _enterRemovePieceMode() {
 /** called when the player clicks a square while removing a piece */
 async function _handleSquareRemoveClick(square) {
     const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♚', '♟']);
- 
-    // Only allow removing actual enemy pieces (not the king)
-    if (!blackUnicode.has(square.textContent) || square.textContent === '♚') {
-        _setStatus('Select a valid opponent piece to remove (not the King).');
-        return;
-    }
- 
     removePieceMode = false;
     document.querySelectorAll('.square').forEach(s => s.classList.remove('moveable'));
+
+    // Only allow removing actual enemy pieces (not the king)
+    if (!blackUnicode.has(square.textContent) || square.textContent === '♚') {
+        _setStatus('Select a valid opponent piece to remove (not the King). Try again by pressing the button.');
+        return false; // didn't go through; do it later
+    }
  
     const file = square.dataset.file;
     const rank = square.dataset.rank;
@@ -275,6 +276,8 @@ async function _handleSquareRemoveClick(square) {
 
     await _requestStockfishMove();
     await updateBoard();
+
+    return true;
 }
 
 async function _checkLegalMove(from, to, promotion) {
@@ -378,13 +381,29 @@ async function resetGame() {
         s.classList.remove('moveable', 'selected');
     });
 
-    let fen = STARTING_POSITIONS[currentLevel-1];
+    let fen = getStartingFEN();
 
     // modifier 9: scramble first rank
     if (scrambleFirstRank) fen = applyScramble(fen);
+
+    // modifier 10: remove half of both sides' pieces (rounded up)
+    if (removeHalfPieces) {
+        fen = applyRemovePieces(fen, -1, "w");
+        fen = applyRemovePieces(fen, -1, "b");
+    }
+
+    // modifier 11: move white's pieces up a rank
+    if (movePiecesUp) {
+        fen = applyMovePiecesUp(fen);
+    }
+
+    // modifier 12: reflect both sides' first rank pieces
+    if (reflectFirstRanks) {
+        fen = applyRefl
+    }
  
     // modifier 20: remove four white pieces
-    if (removeFourPieces) fen = applyRemoveFourPieces(fen);
+    if (removeFourPieces) fen = applyRemovePieces(fen, 4, "w");
 
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
@@ -452,7 +471,7 @@ function releaseSettings() {
     document.querySelectorAll('.console-btn').forEach(btn => {
         btn.disabled = false;
         btn.style.opacity = '1';
-        btn.style.cursor  = 'pointer';
+        btn.style.cursor = 'pointer';
     });
 }
 
@@ -460,18 +479,33 @@ function _setStatus(text) {
     document.getElementById('status').innerText = text;
 }
 
-export function updateChallengePanel(levelId) {
+export function updateChallengePanel() {
     const descriptions = document.getElementsByClassName('challenge-desc');
-    const levelChallenges = CHALLENGES[levelId - 1] ?? [];
 
     for (let i = 0; i < 3; i++) {
-        if (descriptions[i]) descriptions[i].textContent = levelChallenges[i] ?? '';
+        const stars = "⭐".repeat(i+1);
+        let array = [];
+        for (let idx = 0; idx < 20; idx++) {
+            if (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] & (1 << idx)) {
+                const modifierNumber = idx+1;
+                const styling = (getModifierList() & (1 << idx)) ? " style=\"color: #5ff184;\"" : "";
+                const str = `<span${styling}>#${modifierNumber}</span>`;
+                array.push(str);
+            }
+        }
+        const list = array.join(', ');
+        if (descriptions[i]) {
+            if (array.length == 1)
+                descriptions[i].innerHTML = `Pass ${stars} with only modifier ${list}`;
+            else if (array.length > 1)
+                descriptions[i].innerHTML = `Pass ${stars} with only modifiers ${list}`;
+        }
     }
 
     for (let c = 1; c <= 3; c++) {
         const card = document.getElementById(`challenge-${c}`);
         const statusText = card?.querySelector('.challenge-status');
-        const completed = isChallengeComplete(levelId, c);
+        const completed = isChallengeComplete(currentLevel, c);
 
         card?.classList.toggle('completed', completed);
         if (statusText) statusText.innerText = completed ? 'Completed' : 'Locked';
@@ -481,23 +515,22 @@ export function updateChallengePanel(levelId) {
 function _recordCompletions() {
     const difficulty = document.getElementById('engineSelect')?.value;
     const numActiveMods = document.querySelectorAll('.console-btn.active-toggle').length;
-    const hasExtraPiece = extraPieceSelected != null && extraPieceSelected !== 'none';
+    const hasExtraPiece = extraPieceSelected != null;
     let newChallenges = 0;
 
-    // beat on ⭐ with an extra piece
-    if (difficulty === '1' && hasExtraPiece && !isChallengeComplete(currentLevel, 1)) {
-        markChallengeComplete(currentLevel, 1);
-        newChallenges++;
+    let challengePassed = [false, false, false];
+    for (let i = 0; i < 3; i++) {
+        if (getModifierList() === CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] && parseInt(difficulty) === i+1) {
+            challengePassed[i] = true;
+        }
     }
-    // beat on ⭐⭐ with no modifiers
-    if (difficulty === '2' && numActiveMods === 0 && !hasExtraPiece && !isChallengeComplete(currentLevel, 2)) {
-        markChallengeComplete(currentLevel, 2);
-        newChallenges++;
-    }
-    // beat on ⭐⭐⭐ with extra piece + at least 1 other modifier
-    if (difficulty === '3' && hasExtraPiece && numActiveMods >= 1 && !isChallengeComplete(currentLevel, 3)) {
-        markChallengeComplete(currentLevel, 3);
-        newChallenges++;
+
+    // mark newly earned challenge completions
+    for (let i = 0; i < 3; i++) {
+        if (challengePassed[i] && !isChallengeComplete(currentLevel, i+1)) {
+            markChallengeComplete(currentLevel, i+1);
+            newChallenges++;
+        }
     }
 
     setChallengeStarsEarned(getChallengeStarsEarned() + newChallenges);
@@ -545,8 +578,6 @@ function showGameOverModal(playerWon, difficulty) {
         });
     }
 
-    console.log(document.getElementById('next-level-btn').style.display);
-
     if (playerWon) document.getElementById('next-level-btn').style.display = '';
     else document.getElementById('next-level-btn').style.display = 'none';
 
@@ -555,7 +586,7 @@ function showGameOverModal(playerWon, difficulty) {
 
 function _gameLevelClickHandler(levelId) {
     selectLevel(levelId);
-    updateChallengePanel(levelId);
+    updateChallengePanel();
     resetModifiers();
     newGame();
     releaseSettings();
@@ -570,14 +601,18 @@ function initGamePage() {
     createBoard();
     updateBoard(getCurrentFEN() != ''); // restore FEN from previous session if present
 
+    if (isInGame()) confirmSettings();
+    else {
+        resetModifiers();
+        releaseSettings();
+    }
+
     const savedLevel = getCurrentLevel() ?? 1;
     if (savedLevel) {
         selectLevel(savedLevel);
-        updateChallengePanel(savedLevel);
     }
 
-    if (isInGame()) confirmSettings();
-    else releaseSettings();
+    updateChallengePanel();
 
     document.getElementById('settings-btn').addEventListener('click', openSettings);
     document.getElementById('close-settings-btn').addEventListener('click', closeSettings);
@@ -595,7 +630,7 @@ function initGamePage() {
     document.getElementById('new-game').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
     document.getElementById('undo-btn').addEventListener('click', () => { undoMove(); });
 
-    document.getElementById('play-again-btn').addEventListener('click', () => { newGame(); releaseSettings(); });
+    document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
     document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
 
     document.getElementById('home-btn').addEventListener('click', () => { window.location.href = '/'; });

@@ -82,11 +82,14 @@ export function setDifficultyStarsArray(arr) {
 }
 
 export function isChallengeComplete(levelId, challengeIndex) {
-    return localStorage.getItem(`level_${levelId}_challenge_${challengeIndex}`) === 'true';
+    return localStorage.getItem(`level_${levelId}_challenge`) & (1 << (challengeIndex-1));
 }
 
 export function markChallengeComplete(levelId, challengeIndex) {
-    localStorage.setItem(`level_${levelId}_challenge_${challengeIndex}`, 'true');
+    if (!localStorage.getItem(`level_${levelId}_challenge`))
+        localStorage.setItem(`level_${levelId}_challenge`, 1 << (challengeIndex-1));
+    else
+        localStorage.setItem(`level_${levelId}_challenge`, parseInt(localStorage.getItem(`level_${levelId}_challenge`)) + (1 << (challengeIndex-1)));
 }
 
 export function getBoardTheme() {

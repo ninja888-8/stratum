@@ -1,4 +1,5 @@
 import { BUFF_MULTIPLIERS, BUTTON_BLOCK_RULES, EXTRA_PIECE_BY_BUTTON, NUM_MODIFIERS, STARTING_POSITIONS } from './constants.js';
+import { updateChallengePanel } from './game.js';
 import { setStartingFEN, currentLevel } from './levels.js';
 import { getModifierList, hasUsedUndo, hasUsedRemovePiece, 
          setModifiersList, setUsedUndo, setUsedRemovePiece } from './storage.js';
@@ -18,13 +19,22 @@ export let canRemoveOpponentPiece = false;
 // modifier 9: scramble both sides' first rank pieces among themselves
 export let scrambleFirstRank = false;
  
-// modifier 14: pawns cannot promote (move is blocked entirely)
+// modifier 10: remove half of both sides' pieces
+export let removeHalfPieces = false;
+
+// modifier 11: move white's pieces up one rank
+export let movePiecesUp = false;
+
+// modifier 12: reflect both sides' pieces on first rank
+export let reflectFirstRanks = false;
+
+// modifier 18: pawns cannot promote (move is blocked entirely)
 export let noPromotion = false;
  
-// modifier 15: engine gets extra moves at the very start
+// modifier 19: engine gets extra moves at the very start
 export let extraEngineMoves = 0;
  
-// modifier 16: four of the player's pieces are removed at random before the game
+// modifier 20: four of the player's pieces are removed at random before the game
 export let removeFourPieces = false;
 
 
@@ -56,9 +66,12 @@ export function resetModifiers() {
     extraPlayerMoves = 0;
     canRemoveOpponentPiece = false;
     scrambleFirstRank = false;
+    removeHalfPieces = false;
     noPromotion = false;
     extraEngineMoves = 0;
     removeFourPieces = false;
+
+    setStartingFEN(STARTING_POSITIONS[currentLevel-1]);
 
     document.querySelectorAll('.console-btn').forEach(btn => {
         btn.classList.remove('active-toggle', 'btn-locked');
@@ -75,6 +88,7 @@ export function initModifiers() {
             const isActive = button.classList.contains('active-toggle');
             handleModifierToggle(button.dataset.id, isActive);
             applyButtonDisabling();
+            updateChallengePanel();
         };
     });
 
@@ -126,17 +140,23 @@ function applyButtonDisabling() {
     allButtons.forEach(btn => {
         btn.disabled = false;
         btn.classList.remove('btn-locked');
+        btn.style.opacity = '1';
     });
 
     allButtons.forEach(btn => {
         if (!btn.classList.contains('active-toggle')) return;
-        if (!BUTTON_BLOCK_RULES.includes(btn.id)) return;
+        if (BUTTON_BLOCK_RULES.every(array => !array.includes(btn.id))) return;
 
-        BUTTON_BLOCK_RULES.forEach(idToBlock => {
-            const target = document.getElementById(idToBlock);
-            if (target && target != btn) {
-                target.disabled = true;
-                target.classList.add('btn-locked'); // TODO: to style later
+        BUTTON_BLOCK_RULES.forEach(array => {
+            if (array.includes(btn.id)) {
+                array.forEach(idToBlock => {
+                    const target = document.getElementById(idToBlock);
+                    if (target && target != btn) {
+                        target.disabled = true;
+                        target.classList.add('btn-locked');
+                        target.style.opacity = '0.3'; // specific styling for disabled buttons due to button block rules
+                    }
+                })
             }
         });
     });
@@ -177,14 +197,22 @@ function handleModifierToggle(id, isActive, isInitializing = false) {
 
     // scramble first rank
     if (id == 9) {
-        if (isActive) {
-            scrambleFirstRank = true;
-            setStartingFEN(applyScramble(STARTING_POSITIONS[currentLevel-1]));
-        }
-        else {
-            scrambleFirstRank = false;
-            setStartingFEN(STARTING_POSITIONS[currentLevel-1]);
-        }
+        scrambleFirstRank = isActive;
+    }
+
+    // remove half of both sides' pieces
+    if (id == 10) {
+        removeHalfPieces = isActive;
+    }
+
+    // move white's pieces up a rank
+    if (id == 11) {
+        movePiecesUp = isActive;
+    } 
+
+    // reflect first ranks
+    if (id == 12) {
+        reflectFirstRanks = isActive;
     }
 
     // prevent pieces from moving
@@ -192,8 +220,6 @@ function handleModifierToggle(id, isActive, isInitializing = false) {
     if (id >= 13 && id <= 17) {
         if (isActive) bannedPieces.push(pieceList[id-13]);
         else bannedPieces.splice(bannedPieces.indexOf(pieceList[id-13]), 1);
-
-        console.log(bannedPieces);
     }
 
     // no pawn promotion
@@ -219,20 +245,36 @@ function handleModifierToggle(id, isActive, isInitializing = false) {
 }
 
 // helper functions related to FEN
-export function applyScramble(fen) {
-    const parts = fen.split(' ');
-    const rows = parts[0].split('/'); // take first part "3qk3/3pp3/8/8/8/8/PPPPPPPP/RNBQKBNR", then split by slash
- 
-    rows[0] = _shuffleRankPieces(rows[0]); // rank 8 (black back rank)
-    rows[7] = _shuffleRankPieces(rows[7]); // rank 1 (white back rank)
- 
-    parts[0] = rows.join('/');
-    return parts.join(' ');
+function _compressFEN(flat) {
+    let newRows = [];
+    for (let r = 0; r < 8; r++) {
+        const slice = flat.slice(r * 8, r * 8 + 8);
+        let row = '';
+        let emptyCount = 0;
+        for (const sq of slice) {
+            if (sq === null) {
+                emptyCount++;
+            } else {
+                if (emptyCount > 0) { row += emptyCount; emptyCount = 0; }
+                row += sq;
+            }
+        }
+        if (emptyCount > 0) row += emptyCount;
+        newRows.push(row);
+    }
+    return newRows;
 }
 
-function _shuffleRankPieces(row) {
-    // expand to 8-char array
-    const expanded = [];
+function _flattenFEN(rows) {
+    let flat = [];
+    for (const row of rows) {
+        flat = [...flat, ..._flattenRow(row)];
+    }
+    return flat;
+}
+
+function _flattenRow(row) {
+    let expanded = [];
     for (const ch of row) {
         if (isNaN(ch)) {
             expanded.push(ch);
@@ -240,6 +282,12 @@ function _shuffleRankPieces(row) {
             for (let i = 0; i < parseInt(ch); i++) expanded.push(null);
         }
     }
+    return expanded;
+}
+
+function _shuffleRankPieces(row) {
+    // expand to 8-char array
+    const expanded = _flattenRow(row);
  
     const pieceIndices = [];
     const pieces = [];
@@ -269,49 +317,76 @@ function _shuffleRankPieces(row) {
     return result;
 }
 
-export function applyRemoveFourPieces(fen) {
+export function applyScramble(fen) {
+    const parts = fen.split(' ');
+    const rows = parts[0].split('/'); // take first part "3qk3/3pp3/8/8/8/8/PPPPPPPP/RNBQKBNR", then split by slash
+ 
+    rows[0] = _shuffleRankPieces(rows[0]); // rank 8 (black back rank)
+    rows[7] = _shuffleRankPieces(rows[7]); // rank 1 (white back rank)
+ 
+    parts[0] = rows.join('/');
+    return parts.join(' ');
+}
+
+export function applyRemovePieces(fen, number, colour) {
     const parts = fen.split(' ');
     const rows = parts[0].split('/');
  
-    const flat = [];
-    for (const row of rows) {
-        for (const ch of row) {
-            if (isNaN(ch)) flat.push(ch);
-            else for (let i = 0; i < parseInt(ch); i++) flat.push(null);
-        }
-    }
+    const flat = _flattenFEN(rows);
  
-    // indices of all but white king
+    // indices of all but king
     const removable = [];
     flat.forEach((sq, i) => {
-        if (sq !== null && sq === sq.toUpperCase() && sq !== 'K') removable.push(i);
+        if (colour === "w" && sq !== null && sq === sq.toUpperCase() && sq !== 'K') removable.push(i);
+        else if (colour === "b" && sq !== null && sq === sq.toLowerCase() && sq !== 'k') removable.push(i);
     });
  
-    // shuffle and pick up to 4
+    // shuffle and pick up to ___ pieces
     for (let i = removable.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [removable[i], removable[j]] = [removable[j], removable[i]];
     }
-    const toRemove = removable.slice(0, Math.min(4, removable.length));
+    if (number == -1) number = (removable.length+1)/2;
+    const toRemove = removable.slice(0, Math.min(number, removable.length));
     toRemove.forEach(i => { flat[i] = null; });
  
-    // compress back to FEN
-    const newRows = [];
-    for (let r = 0; r < 8; r++) {
-        const slice = flat.slice(r * 8, r * 8 + 8);
-        let row = '';
-        let emptyCount = 0;
-        for (const sq of slice) {
-            if (sq === null) {
-                emptyCount++;
-            } else {
-                if (emptyCount > 0) { row += emptyCount; emptyCount = 0; }
-                row += sq;
-            }
-        }
-        if (emptyCount > 0) row += emptyCount;
-        newRows.push(row);
+    const newRows = _compressFEN(flat);
+ 
+    parts[0] = newRows.join('/');
+    return parts.join(' ');
+}
+
+export function applyMovePiecesUp(fen) {
+    const parts = fen.split(' ');
+    const rows = parts[0].split('/');
+ 
+    const flat = _flattenFEN(rows);
+
+    flat.forEach((sq, i) => {
+        if (sq != null && sq === sq.toUpperCase() && i-8 >= 0 && flat[i-8] == null) {
+            flat[i-8] = sq;
+            flat[i] = null;
+        } 
+    });
+
+    const newRows = _compressFEN(flat);
+ 
+    parts[0] = newRows.join('/');
+    return parts.join(' ');
+}
+
+export function applyReflectFirstRanks(fen) {
+    const parts = fen.split(' ');
+    const rows = parts[0].split('/');
+ 
+    const flat = _flattenFEN(rows);
+
+    for (let i = 0; i < 4; i++) {
+        [flat[i], flat[7-i]] = [flat[7-i], flat[i]];
+        [flat[56+i], flat[63-i]] = [flat[63-i], flat[56+i]];
     }
+
+    const newRows = _compressFEN(flat);
  
     parts[0] = newRows.join('/');
     return parts.join(' ');

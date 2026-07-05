@@ -39,61 +39,61 @@
                 <button id="btn-5" class="console-btn btn-green" data-tooltip="Start with an extra Pawn." data-id=5>
                     <img src="/static/images/gain_pawn.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-green" data-tooltip="Start with one extra move." data-id=6>
+                <button id="btn-6" class="console-btn btn-green" data-tooltip="Start with one extra move." data-id=6>
                     <img src="/static/images/extra_move.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-green" data-tooltip="Gain undo-move button." data-id=7>
+                <button id="btn-7" class="console-btn btn-green" data-tooltip="Gain undo-move button." data-id=7>
                     <img src="/static/images/undo_move.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-green" data-tooltip="Remove any opponent piece (excluding King)." data-id=8>
+                <button id="btn-8" class="console-btn btn-green" data-tooltip="Remove any opponent piece (excluding King). Uses a turn." data-id=8>
                     <img src="/static/images/remove_opponent_piece.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 3: Neutral Effects (Yellow) -->
             <div class="console-row">
-                <button class="console-btn btn-yellow" data-tooltip="Both sides have their first rank pieces randomized." data-id=9>
+                <button id="btn-9" class="console-btn btn-yellow" data-tooltip="Both sides have their first rank pieces randomized." data-id=9>
                     <img src="/static/images/swap_rank.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Start with one extra move." data-id=10>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button id="btn-10" class="console-btn btn-yellow" data-tooltip="Both sides lose half their starting pieces." data-id=10>
+                    <img src="/static/images/remove_half_pieces.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Gain undo-move button once." data-id=11>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button id="btn-11" class="console-btn btn-yellow" data-tooltip="All your pieces are shifted one rank up (if possible)." data-id=11>
+                    <img src="/static/images/advance_pieces.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-yellow" data-tooltip="Remove any opponent piece (excluding King)." data-id=12>
-                    <img src="/static/images/temp.png" class="btn-icon">
+                <button id="btn-12" class="console-btn btn-yellow" data-tooltip="Reflect both players' first rank pieces." data-id=12>
+                    <img src="/static/images/mirrored.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 4: Debuffs (Red) -->
             <div class="console-row">
-                <button class="console-btn btn-red" data-tooltip="Your Queen(s) cannot move." data-id=13>
+                <button id="btn-13" class="console-btn btn-red" data-tooltip="Your Queen(s) cannot move." data-id=13>
                     <img src="/static/images/cannot_move_queen.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Rook(s) cannot move." data-id=14>
+                <button id="btn-14" class="console-btn btn-red" data-tooltip="Your Rook(s) cannot move." data-id=14>
                     <img src="/static/images/cannot_move_rook.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Bishop(s) cannot move." data-id=15>
+                <button id="btn-15" class="console-btn btn-red" data-tooltip="Your Bishop(s) cannot move." data-id=15>
                     <img src="/static/images/cannot_move_bishop.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your Knight(s) cannot move." data-id=16>
+                <button id="btn-16" class="console-btn btn-red" data-tooltip="Your Knight(s) cannot move." data-id=16>
                     <img src="/static/images/cannot_move_knight.png" class="btn-icon">
                 </button>
             </div>
 
             <!-- Row 5: Debuffs (Red) -->
             <div class="console-row">
-                <button class="console-btn btn-red" data-tooltip="Your King cannot move." data-id=17>
+                <button id="btn-17" class="console-btn btn-red" data-tooltip="Your King cannot move." data-id=17>
                     <img src="/static/images/cannot_move_king.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Pawns may not promote." data-id=18>
+                <button id="btn-18" class="console-btn btn-red" data-tooltip="Pawns may not promote." data-id=18>
                     <img src="/static/images/cannot_promote.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Your opponent starts with two extra moves." data-id=19>
+                <button id="btn-19" class="console-btn btn-red" data-tooltip="Your opponent starts with two extra moves." data-id=19>
                     <img src="/static/images/opponent_gain_move.png" class="btn-icon">
                 </button>
-                <button class="console-btn btn-red" data-tooltip="Four of your pieces are removed at random." data-id=20>
+                <button id="btn-20" class="console-btn btn-red" data-tooltip="Four of your pieces are removed at random." data-id=20>
                     <img src="/static/images/remove_four_pieces.png" class="btn-icon">
                 </button>
             </div>
@@ -147,7 +147,7 @@
             <h2>stratum</h2>
             <div class="status-box">
                 <strong>Status:</strong>
-                <div id="status">White's Turn</div>
+                <div id="status"></div>
             </div>
         </div>
         
