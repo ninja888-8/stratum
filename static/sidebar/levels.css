@@ -14,34 +14,33 @@
 }
 
 .level-btn {
-    height: 50px;
-    font-size: 16px;
-    font-weight: bold;
+    height: 62px; /* extra spacing for stars */
     background-color: #ecf0f1;
     border: 2px solid #bdc3c7;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 3px;
     color: #2c3e50;
     transition: all 0.2s ease;
 }
-
+ 
 .level-btn:hover {
     background-color: #34495e;
     color: #ffffff;
     border-color: #34495e;
     transform: scale(1.05);
 }
-
-/* current selected level */
+ 
 .level-btn.active {
-    background-color: #2ecc71; 
-    color: white;
+    background-color: #2ecc71;
+    color: #fff;
     border-color: #27ae60;
 }
-
+ 
 .level-btn.locked {
     background-color: #e0e0e0;
     border-color: #bdc3c7;
@@ -49,15 +48,57 @@
     cursor: not-allowed;
     opacity: 0.6;
 }
-
+ 
 .level-btn.locked:hover {
     transform: none; /* disables pop out animation on hover */
     background-color: #e0e0e0;
     color: #7f8c8d;
 }
 
-/* blue outline for most recent unlocked level */
+/* blue outline for highest non-beaten level that can be played */
 .level-btn.current-unlocked {
     border-color: #3498db;
     box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+}
+ 
+/* styling of level number */
+.level-btn-number {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+ 
+/* styling of level stars */
+.level-btn-stars {
+    display: flex;
+    gap: 1px;
+    line-height: 1;
+}
+ 
+.level-star {
+    font-size: 0.6rem;
+    color: transparent;
+    -webkit-text-stroke: 1px #aaa;
+    transition: color 0.15s, -webkit-text-stroke 0.15s;
+}
+ 
+.level-star--lit {
+    color: #f5c518;
+    -webkit-text-stroke: 1px #c9960c;
+}
+ 
+.level-btn:hover .level-star {
+    -webkit-text-stroke-color: #ccc;
+}
+ 
+.level-btn.active .level-star {
+    -webkit-text-stroke-color: #ccc;
+}
+
+.level-btn:hover .level-star--lit {
+    -webkit-text-stroke-color: #c9960c;
+}
+ 
+.level-btn.active .level-star--lit {
+    -webkit-text-stroke-color: #f9a825;
 }

@@ -1,4 +1,4 @@
-import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST} from './constants.js';
+import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST, CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER} from './constants.js';
 import {
     initStorage,
     isInGame, setInGame,
@@ -17,9 +17,9 @@ import {
 } from './levels.js';
 import { useUndoButton, useExtraPlayerMoves, useRemovePiece, 
          initModifiers, resetModifiers, setUpModifierButtons,
-         difficultyMultiplier, extraPieceSelected, undoButtonReleased, bannedPieces, extraPlayerMoves, canRemoveOpponentPiece, scrambleFirstRank, 
-         removeHalfPieces, movePiecesUp, reflectFirstRanks, noPromotion, extraEngineMoves, removeFourPieces,
-         applyScramble, applyRemovePieces, applyMovePiecesUp, applyReflectFirstRanks,
+         difficultyMultiplier, extraPieceSelected, undoButtonReleased, bannedPieces, extraPlayerMoves, canRemoveOpponentPiece, 
+         scrambleFirstRank, removeHalfPieces, movePiecesUp, reflectFirstRanks, noPromotion, extraEngineMoves, removeFourPieces,
+         applyExtraPiece, applyScramble, applyRemovePieces, applyMovePiecesUp, applyReflectFirstRanks,
 } from './modifiers.js';
 import { openSettings, closeSettings, onDifficultyChange } from './settings.js';
 
@@ -308,6 +308,7 @@ async function _sendMove(from, to, promotion) {
         await fetch(`${API_URL}/skip_move`, { method: 'POST' });
         await updateBoard(false);
     } else {
+        _clearSelection();
         await _requestStockfishMove();
     }
 }
@@ -383,6 +384,9 @@ async function resetGame() {
 
     let fen = getStartingFEN();
 
+    // modifiers 1-5: add a piece to 2nd or 3rd rank
+    if (extraPieceSelected != null) fen = applyExtraPiece(fen);
+
     // modifier 9: scramble first rank
     if (scrambleFirstRank) fen = applyScramble(fen);
 
@@ -399,7 +403,7 @@ async function resetGame() {
 
     // modifier 12: reflect both sides' first rank pieces
     if (reflectFirstRanks) {
-        fen = applyRefl
+        fen = applyReflectFirstRanks(fen);
     }
  
     // modifier 20: remove four white pieces
@@ -408,7 +412,7 @@ async function resetGame() {
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen, extraPiece: extraPieceSelected }),
+        body: JSON.stringify({ fen }),
     });
 
     await updateBoard(false);
@@ -484,6 +488,7 @@ export function updateChallengePanel() {
 
     for (let i = 0; i < 3; i++) {
         const stars = "⭐".repeat(i+1);
+        const requiredDifficulty = CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER[currentLevel-1][i].toFixed(2);
         let array = [];
         for (let idx = 0; idx < 20; idx++) {
             if (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] & (1 << idx)) {
@@ -493,9 +498,21 @@ export function updateChallengePanel() {
                 array.push(str);
             }
         }
+        if (requiredDifficulty != 0 && difficultyMultiplier >= requiredDifficulty) {
+            const styling = " style=\"color: #5ff184;\"";
+            array.push(`<span${styling}>${requiredDifficulty} difficulty multiplier</span>`);
+        }
+        else if (requiredDifficulty != 0) {
+            const styling = "";
+            array.push(`<span${styling}>${requiredDifficulty} difficulty multiplier</span>`);
+        }
         const list = array.join(', ');
         if (descriptions[i]) {
-            if (array.length == 1)
+            if (array.length == 0)
+                descriptions[i].innerHTML = `Pass ${stars} with no modifiers enabled`;
+            else if (array.length == 1 && requiredDifficulty != 0) 
+                descriptions[i].innerHTML = `Pass ${stars} with at least a ${list}`;
+            else if (array.length == 1)
                 descriptions[i].innerHTML = `Pass ${stars} with only modifier ${list}`;
             else if (array.length > 1)
                 descriptions[i].innerHTML = `Pass ${stars} with only modifiers ${list}`;
@@ -554,8 +571,8 @@ function showGameOverModal(playerWon, difficulty) {
     statusHeader.innerText = playerWon ? 'LEVEL PASSED' : 'LEVEL FAILED';
     statusHeader.className = `modal-title ${playerWon ? 'passed' : 'failed'}`;
 
-    document.getElementById('modalDifficulty').innerText =
-        DIFFICULTY_LABELS[difficulty] ?? '[difficulty]';
+    document.getElementById('modalDifficulty').innerText = DIFFICULTY_LABELS[difficulty] ?? '[difficulty]';
+    document.getElementById('modalMultiplier').innerText = difficultyMultiplier.toFixed(2) ?? '[difficulty]';
 
     document.querySelectorAll('.stars-container .star').forEach(star => {
         const starRating = parseInt(star.getAttribute('data-star'));
@@ -568,7 +585,7 @@ function showGameOverModal(playerWon, difficulty) {
     const activeModifiers = document.querySelectorAll('.console-btn.active-toggle');
     if (activeModifiers.length === 0) {
         const li = document.createElement('li');
-        li.innerText = 'None (Standard Match)';
+        li.innerText = 'None';
         modifiersList.appendChild(li);
     } else {
         activeModifiers.forEach(btn => {

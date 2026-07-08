@@ -1,5 +1,5 @@
 import { NUM_LEVELS } from './constants.js';
-import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurrentLevel } from './storage.js';
+import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurrentLevel, getDifficultyStarsArray } from './storage.js';
 
 export let currentLevel = 1;
 let startingFEN = '';
@@ -58,6 +58,7 @@ export function populateLevelGrid(onLevelClick) {
     grid.innerHTML = '';
 
     const highestBeaten = getHighestBeatenLevel();
+    const diffStarsArray = getDifficultyStarsArray();
     currentLevel = getCurrentLevel();
 
     for (let i = 1; i <= NUM_LEVELS; i++) {
@@ -68,10 +69,30 @@ export function populateLevelGrid(onLevelClick) {
         const isUnlocked = i === 1 || i <= highestBeaten + 1;
 
         if (isUnlocked) {
-            btn.textContent = String(i);
-
             // highlight the next level the player hasn't beaten yet
             if (i === highestBeaten + 1) btn.classList.add('current-unlocked');
+
+            // for level number on button
+            const num = document.createElement('span');
+            num.classList.add('level-btn-number');
+            num.textContent = String(i);
+
+            // for star number on button
+            const starsEarned = diffStarsArray[i-1] ?? 0;
+ 
+            const starRow = document.createElement('div');
+            starRow.classList.add('level-btn-stars');
+ 
+            for (let s = 1; s <= 3; s++) {
+                const star = document.createElement('span');
+                star.classList.add('level-star');
+                star.textContent = '★';
+                if (s <= starsEarned) star.classList.add('level-star--lit');
+                starRow.appendChild(star);
+            }
+ 
+            btn.appendChild(num);
+            btn.appendChild(starRow);
 
             btn.onclick = () => {
                 document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));

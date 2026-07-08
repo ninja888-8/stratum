@@ -21,9 +21,7 @@ except Exception as e:
 def set_stockfish_difficulty():
     data = request.json
     elo = data.get('elo')
-
-    print(elo)
-
+    
     global engine
     engine.configure({
         "UCI_LimitStrength": True,
@@ -31,7 +29,7 @@ def set_stockfish_difficulty():
     })  
     return jsonify({"success": True,})
 
-def get_stockfish_move(current_board, depth=15, limit_time=0.1):
+def get_stockfish_move(current_board, depth=15, limit_time=0.5):
     """
     stockfish, asks it for the best move under specific constraints and makes the move
     """
@@ -179,27 +177,10 @@ def stockfish_move():
 def reset():
     data = request.json
     fen = data.get('fen') # setup position based on FEN 
-    extra_piece = data.get('extraPiece')
 
     global board
     board.reset()
     board = chess.Board(fen)
-
-    if extra_piece is not None:
-        location = random.randint(0,7) # put location of piece
-        target_square = chess.square(location, 2) # 3rd rank
-        if extra_piece == 'Q':
-            piece = chess.Piece(chess.QUEEN, chess.WHITE)
-        elif extra_piece == 'R':
-            piece = chess.Piece(chess.ROOK, chess.WHITE)
-        elif extra_piece == 'B':
-            piece = chess.Piece(chess.BISHOP, chess.WHITE)
-        elif extra_piece == 'N':
-            piece = chess.Piece(chess.KNIGHT, chess.WHITE)
-        else:
-            piece = chess.Piece(chess.PAWN, chess.WHITE)
-        
-        board.set_piece_at(target_square, piece)
 
     return jsonify(get_game_state())
 

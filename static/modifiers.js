@@ -67,11 +67,16 @@ export function resetModifiers() {
     canRemoveOpponentPiece = false;
     scrambleFirstRank = false;
     removeHalfPieces = false;
+    movePiecesUp = false;
+    reflectFirstRanks = false;
     noPromotion = false;
     extraEngineMoves = 0;
     removeFourPieces = false;
 
+    document.getElementById('difficulty-multiplier').textContent = `Difficulty Multiplier: [1.00x]`;
+
     setStartingFEN(STARTING_POSITIONS[currentLevel-1]);
+    updateChallengePanel();
 
     document.querySelectorAll('.console-btn').forEach(btn => {
         btn.classList.remove('active-toggle', 'btn-locked');
@@ -168,6 +173,7 @@ function handleModifierToggle(id, isActive, isInitializing = false) {
     // modifier difficulty multiplier TODO: will display later
     const multiplier = BUFF_MULTIPLIERS[id-1];
     difficultyMultiplier = isActive ? difficultyMultiplier * multiplier : difficultyMultiplier / multiplier;
+    document.getElementById('difficulty-multiplier').textContent = `Difficulty Multiplier: [${difficultyMultiplier.toFixed(2)}x]`;
 
     // buttons 1–5 affect extra piece
     if (id >= 1 && id <= 5) {
@@ -315,6 +321,27 @@ function _shuffleRankPieces(row) {
     }
     if (emptyCount > 0) result += emptyCount;
     return result;
+}
+
+export function applyExtraPiece(fen) {
+    const parts = fen.split(' ');
+    const rows = parts[0].split('/');
+ 
+    const flat = _flattenFEN(rows);
+ 
+    // all empty square indices
+    const addable = [];
+    flat.forEach((sq, i) => {
+        if (sq === null && (i >= 40 && i <= 55)) addable.push(i);
+    });
+ 
+    const random = Math.floor(Math.random() * (addable.length));
+    flat[addable[random]] = extraPieceSelected;
+ 
+    const newRows = _compressFEN(flat);
+ 
+    parts[0] = newRows.join('/');
+    return parts.join(' ');
 }
 
 export function applyScramble(fen) {
