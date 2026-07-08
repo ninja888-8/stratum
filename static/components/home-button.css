@@ -5,7 +5,7 @@
     right: 25px;
     width: 55px;
     height: 55px;
-    background-color: #ffffff;
+    background-color: #888;
     border: none;
     border-radius: 50%; /* perfect circle button */
     cursor: pointer;
@@ -19,7 +19,7 @@
 }
 
 .home-btn:hover {
-    background-color: #1abc9c;
+    background-color: #aaa;
     transform: scale(1.08); /* pop-out expansion */
 }
 

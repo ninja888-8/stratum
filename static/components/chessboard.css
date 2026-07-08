@@ -43,10 +43,11 @@
     font-size: 50px;
     cursor: pointer;
     user-select: none;
+    text-shadow: 0px 0px 3px var(--board-highlight), 0px 0px 10px var(--board-highlight);
 }
 
 .square.light { background-color: var(--board-light); }
 .square.dark { background-color: var(--board-dark); }
-.square.selected { background-color: #7b9652 !important; }
-.square.check { background-color: #f56464; }
-.square.moveable { background-color: #bbfcdb; }
+.square.selected { background-color: var(--board-selected) !important; }
+.square.check { background-color: var(--board-check); }
+.square.moveable { background-color: var(--board-moveable); }

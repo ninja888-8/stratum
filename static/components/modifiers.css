@@ -40,11 +40,15 @@
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
     text-align: center;
+    z-index: 1;
 }
 
 .console-btn:active {
     transform: scale(0.97); /* compression feedback */
-    z-index: 1;
+}
+
+.console-btn:hover {
+    z-index: 10;
 }
 
 /* green buttons */
@@ -59,7 +63,6 @@
 .console-btn.btn-green.active-toggle {
     background-color: #1e8449;
     filter: invert(1);
-    z-index: 1;
 }
 
 /* yellow buttons */
@@ -74,7 +77,6 @@
 .console-btn.btn-yellow.active-toggle {
     background-color: #dfbe06;
     filter: invert(1);
-    z-index: 1;
 }
 
 /* red buttons */
@@ -89,7 +91,6 @@
 .console-btn.btn-red.active-toggle {
     background-color: #922b21;
     filter: invert(1);
-    z-index: 1;
 }
 
 .console-btn::after {
@@ -108,7 +109,6 @@
     width: 160px; 
     text-align: left;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 10;
     opacity: 0;
     pointer-events: none; 
     transition: opacity 0.2s ease;

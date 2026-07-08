@@ -16,6 +16,10 @@
     --sidebar-bg: #ffffff;
     --board-dark: #b58863;
     --board-light: #f0d9b5;
+    --board-highlight: #ffffff;
+    --board-selected: #7b9652;
+    --board-check: #f56464;
+    --board-moveable: #bbfcdb;
     --highlight: rgba(255, 255, 0, 0.4);
 }
 
