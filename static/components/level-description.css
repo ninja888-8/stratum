@@ -63,12 +63,15 @@
     margin-bottom: 4px;
 }
 
-.challenge-star {
+.challenge-star-green,
+.challenge-star,
+.challenge-star-red {
     color: #555;
     letter-spacing: 2px;
 }
-
-.challenge-status {
+.challenge-status-green,
+.challenge-status,
+.challenge-status-red {
     color: #555;
     text-transform: uppercase;
     font-weight: 500;
@@ -83,9 +86,14 @@
 }
 
 .challenge-card.completed {
-    border-color: #3ee443;
-    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #587fa5;
+    border-color: #ffffff;
+    background: #333;
     box-shadow: 0 0 15px rgba(255, 202, 40, 0.05);
+}
+
+.challenge-card.completed .challenge-star-green {
+    color: #1dff08;
+    text-shadow: 0 0 6px rgba(90, 255, 40, 0.3);
 }
 
 .challenge-card.completed .challenge-star {
@@ -93,8 +101,21 @@
     text-shadow: 0 0 6px rgba(255, 202, 40, 0.3);
 }
 
+.challenge-card.completed .challenge-star-red {
+    color: #df1010;
+    text-shadow: 0 0 6px rgba(255, 40, 40, 0.3);
+}
+
+.challenge-card.completed .challenge-status-green {
+    color: #1dff08;
+}
+
 .challenge-card.completed .challenge-status {
-    color: #3ee443;
+    color: #ffca28;
+}
+
+.challenge-card.completed .challenge-status-red {
+    color: #df1010;
 }
 
 .challenge-card.completed .challenge-name {

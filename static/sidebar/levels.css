@@ -86,6 +86,16 @@
     color: #f5c518;
     -webkit-text-stroke: 1px #c9960c;
 }
+
+.level-star--lit-green {
+    color: #1dff08;
+    -webkit-text-stroke: 1px #55e048;
+}
+
+.level-star--lit-red {
+    color: #e73f3f;
+    -webkit-text-stroke: 1px #bd2c2c;
+}
  
 .level-btn:hover .level-star {
     -webkit-text-stroke-color: #ccc;
@@ -95,10 +105,26 @@
     -webkit-text-stroke-color: #ccc;
 }
 
+.level-btn:hover .level-star--lit-green {
+    -webkit-text-stroke-color: #55e048;
+}
+ 
+.level-btn.active .level-star--lit-green {
+    -webkit-text-stroke-color: #15ff00;
+}
+
 .level-btn:hover .level-star--lit {
     -webkit-text-stroke-color: #c9960c;
 }
  
 .level-btn.active .level-star--lit {
     -webkit-text-stroke-color: #f9a825;
+}
+
+.level-btn:hover .level-star--lit-red {
+    -webkit-text-stroke-color: #bd2c2c;
+}
+ 
+.level-btn.active .level-star--lit-red {
+    -webkit-text-stroke-color: #cf3a3a;
 }

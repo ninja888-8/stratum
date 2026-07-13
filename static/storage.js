@@ -81,15 +81,18 @@ export function setDifficultyStarsArray(arr) {
     setJSON('difficultyStarsArray', arr);
 }
 
+function setLevelChallenges(arr) {
+    setJSON('levelChallenges', arr);
+}
+
 export function isChallengeComplete(levelId, challengeIndex) {
-    return localStorage.getItem(`level_${levelId}_challenge`) & (1 << (challengeIndex-1));
+    return parseInt(getJSON('levelChallenges', Array(NUM_LEVELS).fill(0))[levelId-1]) & (1 << (challengeIndex-1));
 }
 
 export function markChallengeComplete(levelId, challengeIndex) {
-    if (!localStorage.getItem(`level_${levelId}_challenge`))
-        localStorage.setItem(`level_${levelId}_challenge`, 1 << (challengeIndex-1));
-    else
-        localStorage.setItem(`level_${levelId}_challenge`, parseInt(localStorage.getItem(`level_${levelId}_challenge`)) + (1 << (challengeIndex-1)));
+    let array = getJSON('levelChallenges', Array(NUM_LEVELS).fill(0));
+    array[levelId-1] += (1 << (challengeIndex-1));
+    setJSON('levelChallenges', array);
 }
 
 export function getBoardTheme() {
@@ -154,9 +157,9 @@ export function initStorage() {
     if (localStorage.getItem('selectedPieceTheme') === null) setPieceTheme('text');
     if (localStorage.getItem('difficultyStarsEarned') === null) setDifficultyStarsEarned(0);
     if (localStorage.getItem('challengeStarsEarned') === null) setChallengeStarsEarned(0);
-    if (localStorage.getItem('difficultyStarsArray') === null) {
-        setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
-    }
+    if (localStorage.getItem('difficultyStarsArray') === null) setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
+    if (localStorage.getItem('levelChallenges') === null) setLevelChallenges(Array(NUM_LEVELS).fill(0));
+
     if (localStorage.getItem('currentFEN') === null) setCurrentFEN('');
     if (localStorage.getItem('currentLevel') === null) setCurrentLevel(0);
 }

@@ -309,6 +309,7 @@ async function _sendMove(from, to, promotion) {
         await updateBoard(false);
     } else {
         _clearSelection();
+        await updateBoard(false);
         await _requestStockfishMove();
     }
 }
@@ -521,7 +522,7 @@ export function updateChallengePanel() {
 
     for (let c = 1; c <= 3; c++) {
         const card = document.getElementById(`challenge-${c}`);
-        const statusText = card?.querySelector('.challenge-status');
+        const statusText = card?.querySelector('.challenge-status-green') || card?.querySelector('.challenge-status') || card?.querySelector('.challenge-status-red');
         const completed = isChallengeComplete(currentLevel, c);
 
         card?.classList.toggle('completed', completed);
@@ -537,7 +538,9 @@ function _recordCompletions() {
 
     let challengePassed = [false, false, false];
     for (let i = 0; i < 3; i++) {
-        if (getModifierList() === CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] && parseInt(difficulty) === i+1) {
+        if ((getModifierList() === CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] 
+            || (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] == 0 && difficultyMultiplier >= CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER[currentLevel-1][i].toFixed(2))) 
+            && parseInt(difficulty) === i+1) {
             challengePassed[i] = true;
         }
     }
@@ -616,7 +619,11 @@ function initGamePage() {
 
     populateLevelGrid(_gameLevelClickHandler);
     createBoard();
-    updateBoard(getCurrentFEN() != ''); // restore FEN from previous session if present
+    if (getCurrentFEN() != '') updateBoard(true);
+    else {
+        newGame();
+        releaseSettings();
+    }
 
     if (isInGame()) confirmSettings();
     else {

@@ -1,4 +1,5 @@
 import { NUM_LEVELS } from './constants.js';
+import { initBackground } from './background.js';
 import { initStorage, getHighestBeatenLevel, getDifficultyStarsEarned, getChallengeStarsEarned } from './storage.js';
 import { initTheme, onBoardThemeChange, onPieceThemeChange } from './theme.js';
 import { populateLevelGrid, selectLevel, openLevelSidebar, closeLevelSidebar } from './levels.js';
@@ -33,6 +34,7 @@ function updateMenuMetrics() {
 }
 
 function initMenuPage() {
+    initBackground();
     initStorage();
     initTheme();
 

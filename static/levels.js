@@ -1,5 +1,5 @@
 import { NUM_LEVELS } from './constants.js';
-import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurrentLevel, getDifficultyStarsArray } from './storage.js';
+import { getHighestBeatenLevel, setHighestBeatenLevel, getCurrentLevel, setCurrentLevel, getDifficultyStarsArray, setCurrentFEN, isChallengeComplete } from './storage.js';
 
 export let currentLevel = 1;
 let startingFEN = '';
@@ -13,6 +13,8 @@ export function setStartingFEN(fen) {
 }
 
 export function selectLevel(levelId) {
+    if (currentLevel != levelId) setCurrentFEN('');
+
     setCurrentLevel(levelId);
     currentLevel = levelId;
 
@@ -80,19 +82,35 @@ export function populateLevelGrid(onLevelClick) {
             // for star number on button
             const starsEarned = diffStarsArray[i-1] ?? 0;
  
-            const starRow = document.createElement('div');
-            starRow.classList.add('level-btn-stars');
+            const levelStarRow = document.createElement('div');
+            levelStarRow.classList.add('level-btn-stars');
  
             for (let s = 1; s <= 3; s++) {
                 const star = document.createElement('span');
                 star.classList.add('level-star');
                 star.textContent = '★';
                 if (s <= starsEarned) star.classList.add('level-star--lit');
-                starRow.appendChild(star);
+                levelStarRow.appendChild(star);
+            }
+
+            const challengeStarRow = document.createElement('div');
+            challengeStarRow.classList.add('level-btn-stars');
+ 
+            for (let s = 1; s <= 3; s++) {
+                const star = document.createElement('span');
+                star.classList.add('level-star');
+                star.textContent = '★';
+                
+                if (s == 1 && isChallengeComplete(i, 1)) star.classList.add('level-star--lit-green');
+                else if (s == 2 && isChallengeComplete(i, 2)) star.classList.add('level-star--lit');
+                else if (s == 3 && isChallengeComplete(i, 3)) star.classList.add('level-star--lit-red');
+                
+                challengeStarRow.appendChild(star);
             }
  
             btn.appendChild(num);
-            btn.appendChild(starRow);
+            btn.appendChild(levelStarRow);
+            btn.appendChild(challengeStarRow);
 
             btn.onclick = () => {
                 document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));

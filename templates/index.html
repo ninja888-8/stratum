@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>stratum</title>
+    <link rel="icon" type="image/favicon-icon" href="/static/images/gain_pawn.png">
     <link rel="stylesheet" href="/static/main.css">
 </head>
 <body class="menu-body">
 <script>/*fix*/</script>
+
+<div id="pawn-canvas"></div>
+
 <div class="menu-container">
     <header class="menu-header">
         <span class="decorator">&gt;</span>
@@ -115,7 +119,7 @@
 <div id="levelOverlay" class="sidebar-overlay"></div>
 <div id="levelSidebar" class="settings-sidebar">
     <div class="sidebar-header">
-        <h3>Select Level</h3>
+        <h3>Level Select</h3>
         <button class="close-sidebar-btn" id="close-level-btn">×</button>
     </div>
     
@@ -127,6 +131,7 @@
 </div>
 
 <script type="module" src="static/menu.js"></script>
+<script type="module" src="static/background.js"></script>
 
 </body>
 </html>
