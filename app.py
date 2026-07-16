@@ -3,8 +3,6 @@ from flask_cors import CORS
 import os
 import chess
 import chess.engine
-import stat
-import resource
 
 app = Flask(__name__, static_folder='static')
 CORS(app) 
@@ -12,34 +10,13 @@ CORS(app)
 board = chess.Board()
 STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
-if os.path.exists(STOCKFISH_PATH):
-    os.chmod(STOCKFISH_PATH, os.stat(STOCKFISH_PATH).st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
-
-# start engine up
-try:
-    engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
-    engine.configure({
-        "Hash": 1,
-        "Threads": 1,
-        "UCI_LimitStrength": True,
-        "UCI_Elo": 1320
-    })
-    print(f"Stockfish started, PID: {engine.transport._proc.pid}")
-except Exception as e:
-    print(f"Error starting Stockfish: {e}")
+app.config['STOCKFISH_ELO'] = 1320
 
 @app.route('/api/set_elo', methods=['POST'])
 def set_stockfish_difficulty():
     data = request.json
     elo = data.get('elo')
-    
-    global engine
-    engine.configure({
-        "Hash": 1,
-        "Threads": 1,
-        "UCI_LimitStrength": True,
-        "UCI_Elo": elo
-    })  
+    app.config['STOCKFISH_ELO'] = elo
     return jsonify({"success": True,})
 
 def get_stockfish_move(current_board, depth=8, limit_time=0.1):
@@ -47,9 +24,13 @@ def get_stockfish_move(current_board, depth=8, limit_time=0.1):
     stockfish, asks it for the best move under specific constraints and makes the move
     """
     try:
-        global engine
-        mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        print(f"Memory before Stockfish call: {mem_mb:.1f} MB")
+        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+        engine.configure({
+            "Hash": 1,
+            "Threads": 1,
+            "UCI_LimitStrength": True,
+            "UCI_Elo": app.config.get('STOCKFISH_ELO')
+        })
         # set stockfish thinking limits (ethink for maximum [x] seconds or up to [x] moves deep)
         limit = chess.engine.Limit(time=limit_time, depth=depth)
         
