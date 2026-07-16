@@ -5,7 +5,7 @@ import chess
 import chess.engine
 import stat
 
-app = Flask(__name__, static_folder='../static')
+app = Flask(__name__, static_folder='static')
 CORS(app) 
 
 board = chess.Board()
