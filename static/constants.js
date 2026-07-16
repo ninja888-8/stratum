@@ -1,4 +1,4 @@
-export const API_URL = 'http://127.0.0.1:5000/api';
+export const API_URL = '/api';
 export const NUM_LEVELS = 25;
 export const NUM_MODIFIERS = 20;
 

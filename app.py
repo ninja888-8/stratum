@@ -3,13 +3,16 @@ from flask_cors import CORS
 import os
 import chess
 import chess.engine
-import random
+import stat
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app = Flask(__name__, static_folder='../static')
 CORS(app) 
 
 board = chess.Board()
-STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), '../engine/stockfish/stockfish.exe')
+STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
+
+if os.path.exists(STOCKFISH_PATH):
+    os.chmod(STOCKFISH_PATH, os.stat(STOCKFISH_PATH).st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
 
 # start engine up
 try:
@@ -72,18 +75,11 @@ def get_game_state():
 @app.route('/')
 def home():
     """Generates HTML webpage (home screen)"""
-    global engine
-    engine.close()
     return render_template('index.html')
 
 @app.route('/game')
 def game():
     """Generates HTML webpage (game screen)"""
-    global engine
-    try:
-        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
-    except Exception as e:
-        print(f"Error starting Stockfish: {e}")
     return render_template('game.html')
 
 @app.route('/api/legal_moves', methods=['GET'])
