@@ -40,7 +40,7 @@ def set_stockfish_difficulty():
     })  
     return jsonify({"success": True,})
 
-def get_stockfish_move(current_board, depth=15, limit_time=0.5):
+def get_stockfish_move(current_board, depth=8, limit_time=0.1):
     """
     stockfish, asks it for the best move under specific constraints and makes the move
     """
