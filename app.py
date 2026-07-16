@@ -17,6 +17,12 @@ if os.path.exists(STOCKFISH_PATH):
 # start engine up
 try:
     engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+    engine.configure({
+        "Hash": 1,
+        "Threads": 1,
+        "UCI_LimitStrength": True,
+        "UCI_Elo": 1320
+    })
 except Exception as e:
     print(f"Error starting Stockfish: {e}")
 
@@ -27,6 +33,8 @@ def set_stockfish_difficulty():
     
     global engine
     engine.configure({
+        "Hash": 1,
+        "Threads": 1,
         "UCI_LimitStrength": True,
         "UCI_Elo": elo
     })  
