@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import chess
@@ -75,12 +75,12 @@ def get_game_state():
 @app.route('/')
 def home():
     """Generates HTML webpage (home screen)"""
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
 @app.route('/game')
 def game():
     """Generates HTML webpage (game screen)"""
-    return render_template('game.html')
+    return send_from_directory('.', 'game.html')
 
 @app.route('/api/legal_moves', methods=['GET'])
 def get_legal_moves():
