@@ -4,6 +4,7 @@ import os
 import chess
 import chess.engine
 import stat
+import resource
 
 app = Flask(__name__, static_folder='static')
 CORS(app) 
@@ -23,6 +24,7 @@ try:
         "UCI_LimitStrength": True,
         "UCI_Elo": 1320
     })
+    print(f"Stockfish started, PID: {engine.transport._proc.pid}")
 except Exception as e:
     print(f"Error starting Stockfish: {e}")
 
@@ -46,6 +48,8 @@ def get_stockfish_move(current_board, depth=8, limit_time=0.1):
     """
     try:
         global engine
+        mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+        print(f"Memory before Stockfish call: {mem_mb:.1f} MB")
         # set stockfish thinking limits (ethink for maximum [x] seconds or up to [x] moves deep)
         limit = chess.engine.Limit(time=limit_time, depth=depth)
         
