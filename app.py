@@ -12,31 +12,72 @@ STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
 app.config['STOCKFISH_ELO'] = 1320
 
+# single persistent engine
+engine = None
+
+def start_engine():
+    global engine
+    try:
+        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+        engine.configure({
+            "Hash": 16,
+            "Threads": 1,
+            "UCI_LimitStrength": True,
+            "UCI_Elo": app.config.get('STOCKFISH_ELO', 1320),
+        })
+        print(f"Stockfish started (PID {engine.transport._proc.pid})")
+    except Exception as e:
+        print(f"Error starting Stockfish: {e}")
+        engine = None
+
+def get_engine():
+    global engine
+    if engine is None:
+        print("Starting new stockfish instance")
+        start_engine()
+        return engine
+
+    try:
+        engine.ping()
+    except Exception:
+        print("Restarting engine")
+        try:
+            engine.close()
+        except Exception:
+            pass
+        start_engine()
+
+    return engine
+
 @app.route('/api/set_elo', methods=['POST'])
 def set_stockfish_difficulty():
     data = request.json
     elo = data.get('elo')
     app.config['STOCKFISH_ELO'] = elo
+
+    try:
+        eng = get_engine()
+        if eng:
+            eng.configure({
+                "UCI_LimitStrength": True,
+                "UCI_Elo": elo,
+            })
+    except Exception as e:
+        print(f"Error setting ELO: {e}")
+
     return jsonify({"success": True,})
 
 def get_stockfish_move(current_board, depth=8, limit_time=0.1):
     """
     stockfish, asks it for the best move under specific constraints and makes the move
     """
+    eng = get_engine()
+    if eng is None:
+        print("No engine available")
+        return None
     try:
-        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
-        engine.configure({
-            "Hash": 1,
-            "Threads": 1,
-            "UCI_LimitStrength": True,
-            "UCI_Elo": app.config.get('STOCKFISH_ELO')
-        })
-        # set stockfish thinking limits (ethink for maximum [x] seconds or up to [x] moves deep)
         limit = chess.engine.Limit(time=limit_time, depth=depth)
-        
-        # Ask Stockfish to evaluate the position
-        result = engine.play(current_board, limit)
-        
+        result = eng.play(current_board, limit)
         return result.move
     except Exception as e:
         print(f"Error communicating with Stockfish: {e}")
