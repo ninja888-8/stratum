@@ -104,7 +104,7 @@ export function setBoardTheme(theme) {
 }
 
 export function getPieceTheme() {
-    return getString('selectedPieceTheme', 'text');
+    return getString('selectedPieceTheme', 'white');
 }
 
 export function setPieceTheme(theme) {
@@ -154,7 +154,7 @@ export function setCurrentFEN(fen) {
 export function initStorage() {
     if (localStorage.getItem('highestBeatenLevel') === null) setHighestBeatenLevel(0);
     if (localStorage.getItem('selectedBoardTheme') === null) setBoardTheme('classic');
-    if (localStorage.getItem('selectedPieceTheme') === null) setPieceTheme('text');
+    if (localStorage.getItem('selectedPieceTheme') === null) setPieceTheme('white');
     if (localStorage.getItem('difficultyStarsEarned') === null) setDifficultyStarsEarned(0);
     if (localStorage.getItem('challengeStarsEarned') === null) setChallengeStarsEarned(0);
     if (localStorage.getItem('difficultyStarsArray') === null) setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
