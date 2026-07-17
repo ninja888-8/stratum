@@ -173,9 +173,9 @@ def make_move():
     try:
         move = chess.Move.from_uci(uci_move)
         board.push(move)
-        return jsonify({"success": True, "state": get_game_state()})
+        return jsonify({"success": True, "state": get_game_state(board)})
     except ValueError:
-        return jsonify({"success": False, "state": get_game_state()})
+        return jsonify({"success": False, "state": get_game_state(board)})
 
 @app.route('/api/skip_move', methods=['POST'])
 def skip_move():
