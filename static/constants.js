@@ -133,3 +133,14 @@ export const DIFFICULTY_ELO = {
     2: 1800,
     3: 2200,
 };
+
+export function apiFetch(path, options = {}) {
+    return fetch(API_URL + path, {
+        ...options,
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+        },
+    });
+}

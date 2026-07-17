@@ -1,4 +1,4 @@
-import { API_URL, DIFFICULTY_ELO } from './constants.js';
+import { DIFFICULTY_ELO, apiFetch} from './constants.js';
 import { onBoardThemeChange, onPieceThemeChange } from './theme.js';
 
 export function openSettings() {
@@ -32,7 +32,7 @@ export async function onDifficultyChange() {
     const select = document.getElementById('engineSelect');
     const stockfish_elo = DIFFICULTY_ELO[parseInt(select.value)] ?? null;
 
-    await fetch(`${API_URL}/set_elo`, {
+    await apiFetch('/set_elo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ elo: stockfish_elo }),

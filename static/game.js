@@ -1,4 +1,4 @@
-import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST, CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER} from './constants.js';
+import { NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST, CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER, apiFetch} from './constants.js';
 import {
     initStorage,
     isInGame, setInGame,
@@ -59,7 +59,7 @@ function createBoard() {
 }
 
 async function updateBoard(fromPreviousFEN = false) {
-    const response = await fetch(`${API_URL}/state`);
+    const response = await apiFetch(`/state`);
     const data = await response.json();
 
     const fenRows = fromPreviousFEN
@@ -89,7 +89,7 @@ async function updateBoard(fromPreviousFEN = false) {
     });
 
     document.getElementById('status').innerText = data.status_text;
-    const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
+    const legalMoves = await (await apiFetch(`/legal_moves`)).json();
 
     if (data.is_game_over) {
         const playerWon = data.turn === 'b';
@@ -128,7 +128,7 @@ async function handleSquareClick(square) {
         return;
     }
 
-    const response = await fetch(`${API_URL}/state`);
+    const response = await apiFetch(`/state`);
     const data = await response.json();
 
     if (selectedSquare) {
@@ -193,7 +193,7 @@ async function _selectSquare(square, gameState) {
     // cannot move piece due to modifier
     if (bannedPieces.includes(selectedSquare.textContent)) return;
 
-    const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
+    const legalMoves = await (await apiFetch(`/legal_moves`)).json();
     const squares = document.querySelectorAll('.square');
 
     for (let i = 0; i < 64; i++) {
@@ -262,7 +262,7 @@ async function _handleSquareRemoveClick(square) {
     const file = square.dataset.file;
     const rank = square.dataset.rank;
  
-    await fetch(`${API_URL}/remove_piece`, {
+    await apiFetch(`/remove_piece`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ square: file + rank }),
@@ -271,7 +271,7 @@ async function _handleSquareRemoveClick(square) {
     await updateBoard(false);
     _setStatus("piece removed! stockfish turn!");
 
-    await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+    await apiFetch(`/skip_move`, { method: 'POST' });
     await updateBoard(false);
 
     await _requestStockfishMove();
@@ -281,7 +281,7 @@ async function _handleSquareRemoveClick(square) {
 }
 
 async function _checkLegalMove(from, to, promotion) {
-    const res = await fetch(`${API_URL}/check`, {
+    const res = await apiFetch(`/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
@@ -291,7 +291,7 @@ async function _checkLegalMove(from, to, promotion) {
 }
 
 async function _sendMove(from, to, promotion) {
-    await fetch(`${API_URL}/move`, {
+    await apiFetch(`/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
@@ -305,7 +305,7 @@ async function _sendMove(from, to, promotion) {
         } else {
             _setStatus("last bonus move used.");
         }
-        await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+        await apiFetch(`/skip_move`, { method: 'POST' });
         await updateBoard(false);
     } else {
         _clearSelection();
@@ -342,10 +342,10 @@ async function _requestStockfishMove(count = 1) {
     document.getElementById('status').innerText = 'Stockfish is thinking…';
     for (let i = 0; i < count; i++) {
         if (count > 1) {
-            await fetch(`${API_URL}/skip_move`, { method: 'POST' });
+            await apiFetch(`/skip_move`, { method: 'POST' });
         }
         try {
-            const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
+            const res = await apiFetch(`/stockfish_move`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
                 const isOver = await updateBoard(false);
@@ -367,7 +367,7 @@ async function newGame() {
     });
 
     const fen = STARTING_POSITIONS[currentLevel-1];
-    await fetch(`${API_URL}/reset`, {
+    await apiFetch(`/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fen, extraPiece: null }),
@@ -410,7 +410,7 @@ async function resetGame() {
     // modifier 20: remove four white pieces
     if (removeFourPieces) fen = applyRemovePieces(fen, 4, "w");
 
-    await fetch(`${API_URL}/reset`, {
+    await apiFetch(`/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fen }),
@@ -432,10 +432,10 @@ async function resetGame() {
 
 async function undoMove() {
     if (undoButtonReleased) {
-        const response = await fetch(`${API_URL}/undo`, { method: 'POST' });
+        const response = await apiFetch(`/undo`, { method: 'POST' });
         const data = await response.json();
 
-        await fetch(`${API_URL}/undo`, { method: 'POST' });
+        await apiFetch(`/undo`, { method: 'POST' });
         await updateBoard(false);
         if (data.success) // successfully undid move
             useUndoButton();
