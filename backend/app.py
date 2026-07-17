@@ -3,7 +3,6 @@ from flask_cors import CORS
 import os
 import chess
 import chess.engine
-import random
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 CORS(app) 
@@ -35,10 +34,7 @@ def get_stockfish_move(current_board, depth=15, limit_time=0.5):
     """
     try:
         global engine
-        # set stockfish thinking limits (ethink for maximum [x] seconds or up to [x] moves deep)
         limit = chess.engine.Limit(time=limit_time, depth=depth)
-        
-        # Ask Stockfish to evaluate the position
         result = engine.play(current_board, limit)
         
         return result.move
@@ -104,7 +100,7 @@ def make_move():
     target = data.get('to')
     promotion = data.get('promotion', '')
 
-    # Combine source, target, and promotion into UCI format (e.g., e2e4, or e7e8q)
+    # Combine move into UCI format (e.g., e2e4, or e7e8q)
     uci_move = source + target + promotion
 
     try:
@@ -112,7 +108,6 @@ def make_move():
         board.push(move)
         return jsonify({"success": True, "state": get_game_state()})
     except ValueError:
-        # Catch invalid UCI formats
         return jsonify({"success": False, "state": get_game_state()})
 
 @app.route('/api/skip_move', methods=['POST'])
@@ -148,7 +143,6 @@ def check_move():
         else:
             return jsonify({"success": False})
     except ValueError:
-        # Catch invalid UCI formats
         return jsonify({"success": False})
     
 @app.route('/api/stockfish_move', methods=['POST'])

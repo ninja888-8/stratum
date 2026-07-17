@@ -539,7 +539,7 @@ function _recordCompletions() {
     let challengePassed = [false, false, false];
     for (let i = 0; i < 3; i++) {
         if ((getModifierList() === CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] 
-            || (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] == 0 && difficultyMultiplier >= CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER[currentLevel-1][i].toFixed(2))) 
+            || (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] == -1 && difficultyMultiplier >= CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER[currentLevel-1][i].toFixed(2))) 
             && parseInt(difficulty) === i+1) {
             challengePassed[i] = true;
         }
