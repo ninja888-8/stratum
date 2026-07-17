@@ -34,7 +34,6 @@ export async function onDifficultyChange() {
 
     await apiFetch('/set_elo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ elo: stockfish_elo }),
     });
 }

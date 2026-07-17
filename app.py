@@ -10,11 +10,13 @@ import time
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 CORS(app, supports_credentials=True, origins=[
     'https://stratum-ynaa.onrender.com'
 ])
 
-board = chess.Board()
 STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
 games = {}
@@ -54,7 +56,7 @@ def start_engine(elo = 1320):
     try:
         engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
         engine.configure({
-            "Hash": 64,
+            "Hash": 32,
             "Threads": 1,
             "UCI_LimitStrength": True,
             "UCI_Elo": elo,
@@ -103,7 +105,7 @@ def set_stockfish_difficulty():
 
     return jsonify({"success": True})
 
-def get_stockfish_move(game, current_board, depth=8, limit_time=0.1):
+def get_stockfish_move(game, current_board, depth=12, limit_time=0.2):
     """
     stockfish, asks it for the best move under specific constraints and makes the move
     """
