@@ -4,15 +4,34 @@ import os
 import chess
 import chess.engine
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+from threading import Thread
+import subprocess
+import sys
+import webview
+
+# global vars
+if getattr(sys, 'frozen', False):
+    base_dir = sys._MEIPASS
+else:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+TEMPLATES_PATH = os.path.join(base_dir, 'templates')
+STATIC_PATH = os.path.join(base_dir, 'static')
+STOCKFISH_PATH = os.path.join(base_dir, 'engine', 'stockfish', 'stockfish.exe')
+ICON_PATH = os.path.join(STATIC_PATH, 'images', 'icon.ico')
+
+app = Flask(__name__, template_folder=TEMPLATES_PATH, static_folder=STATIC_PATH)
 CORS(app) 
-
 board = chess.Board()
-STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), '../engine/stockfish/stockfish.exe')
 
-# start engine up
+def get_startupinfo():
+    info = subprocess.STARTUPINFO()
+    info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    info.wShowWindow = subprocess.SW_HIDE
+    return info
+
 try:
-    engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+    engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH, startupinfo=get_startupinfo())
 except Exception as e:
     print(f"Error starting Stockfish: {e}")
 
@@ -77,7 +96,7 @@ def game():
     """Generates HTML webpage (game screen)"""
     global engine
     try:
-        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+        engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH, startupinfo=get_startupinfo())
     except Exception as e:
         print(f"Error starting Stockfish: {e}")
     return render_template('game.html')
@@ -186,5 +205,26 @@ def undo():
     else:
         return jsonify({"success": False})
 
+def run_backend():
+    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    backend_thread = Thread(target=run_backend, daemon=True)
+    backend_thread.start()
+
+    def on_closed():
+        global engine
+        try:
+            engine.close()
+        except:
+            pass
+    
+    window = webview.create_window(
+        title='stratum', 
+        url='http://127.0.0.1:5000', 
+        width=1920, 
+        height=1080,
+        resizable=True
+    )
+    window.events.closed += on_closed
+    webview.start(icon=ICON_PATH, private_mode=False)
