@@ -10,12 +10,20 @@ import time
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=[
+    'https://stratum-ynaa.onrender.com'
+])
 
 board = chess.Board()
 STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
 games = {}
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+    print(traceback.format_exc())
+    return jsonify({"error": str(e)}), 500
 
 def get_game():
     if 'game_id' not in session:

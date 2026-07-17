@@ -264,7 +264,6 @@ async function _handleSquareRemoveClick(square) {
  
     await apiFetch(`/remove_piece`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ square: file + rank }),
     });
  
@@ -283,7 +282,6 @@ async function _handleSquareRemoveClick(square) {
 async function _checkLegalMove(from, to, promotion) {
     const res = await apiFetch(`/check`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
     });
     const data = await res.json();
@@ -293,7 +291,6 @@ async function _checkLegalMove(from, to, promotion) {
 async function _sendMove(from, to, promotion) {
     await apiFetch(`/move`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
     });
     
@@ -369,8 +366,7 @@ async function newGame() {
     const fen = STARTING_POSITIONS[currentLevel-1];
     await apiFetch(`/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen, extraPiece: null }),
+        body: JSON.stringify({ fen }),
     });
 
     await updateBoard(false);
@@ -412,7 +408,6 @@ async function resetGame() {
 
     await apiFetch(`/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fen }),
     });
 
