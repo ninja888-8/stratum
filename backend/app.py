@@ -100,7 +100,7 @@ def make_move():
     target = data.get('to')
     promotion = data.get('promotion', '')
 
-    # Combine move into UCI format (e.g., e2e4, or e7e8q)
+    # combine move into UCI format (e.g., e2e4, or e7e8q)
     uci_move = source + target + promotion
 
     try:
