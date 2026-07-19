@@ -60,23 +60,42 @@
             <p>single player chess (against the engine) with a small twist!?</p>
             <p>each separate level challenges you against an increasingly difficult starting position. each level contains three difficulties:</p>
             <ul>
-                <li>★ (Intermediate): Roughly 1320 elo</li>
-                <li>★★ (Advanced): Roughly 1800 elo.</li>
-                <li>★★★ (Expert): Roughly 2200 elo.</li>
+                <li>Beginner (★)</li>
+                <li>Intermediate (★★)</li>
+                <li>Advanced (★★★)</li>
             </ul>
-            <p>either draw or win the game to succeed!</p>
+            <p>either draw or win the game to succeed! (some extra lenience!)</p>
+
+            <p>select the level you wish to play using the level select menu</p>
+            <div class="instruction-img-container">
+                <img src="/static/images/levels.png" class="instruction-img">
+                <p class="img-caption">
+                    you can earn up to 6 stars on each level, 3 from the engine difficulty, and 3 from the unique challenges.
+                    the next level is only unlocked when you beat the previous level, at any difficulty.
+                </p>
+            </div>
+
 
             <p>seems difficult? keep in mind that there are difficulty modifiers implemented in game</p>
             <div class="instruction-img-container">
                 <img src="/static/images/modifiers.png" class="instruction-img">
-                <p class="img-caption">Use the side console to toggle game modifiers before clicking into the match</p>
+                <p class="img-caption">
+                    use the side console to toggle game modifiers before clicking into the match. 
+                    each modifier has its own difficulty multiplier associated with it. 
+                    certain modifiers impose a hard restriction preventing you from choosing certain other modifiers.
+                </p>
             </div>
 
-            <p>challenges listed under each level require the specific difficulty and modifiers active, in any run</p>
+            <p>challenges listed under each level require the specific difficulty and modifiers active / overall difficulty multiplier required, in any successful attempt</p>
             <div class="instruction-img-container">
                 <img src="/static/images/challenges.png" class="instruction-img">
-                <p class="img-caption">Meet challenge requirements and pass the level to earn the challenge star</p>
+                <p class="img-caption">
+                    meet challenge requirements and pass the level to earn the special challenge star. 
+                    challenges must be followed STRICTLY to earn a completion (no extra modifiers, even if it makes it harder!)
+                </p>
             </div>
+
+            <p>keep in mind that it is ILLEGAL to capture the opponent's king even if your combination of modifiers allows you to do so </p>
 
             <hr class="modal-divider">
             <button class="modal-close-action-btn" id="close-instructions-btn">close</button>

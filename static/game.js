@@ -487,7 +487,7 @@ export function updateChallengePanel() {
         const requiredDifficulty = CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER[currentLevel-1][i].toFixed(2);
         let array = [];
         for (let idx = 0; idx < 20; idx++) {
-            if (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] & (1 << idx)) {
+            if (CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] != -1 && CHALLENGES_REQUIRED_MODIFIERS_LIST[currentLevel-1][i] & (1 << idx)) {
                 const modifierNumber = idx+1;
                 const styling = (getModifierList() & (1 << idx)) ? " style=\"color: #5ff184;\"" : "";
                 const str = `<span${styling}>#${modifierNumber}</span>`;
@@ -562,7 +562,7 @@ function _recordCompletions() {
     }
 }
 function showGameOverModal(playerWon, difficulty) {
-    const DIFFICULTY_LABELS = { '1': 'intermediate', '2': 'advanced', '3': 'expert' };
+    const DIFFICULTY_LABELS = { '1': 'beginner', '2': 'intermediate', '3': 'advanced' };
     const modal = document.getElementById('gameOverModal');
 
     const statusHeader = document.getElementById('modalStatus');
