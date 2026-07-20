@@ -19,4 +19,5 @@
 .floating-pawn {
     position: absolute;
     will-change: transform, opacity;
+    z-index: 0;
 }

@@ -12,6 +12,8 @@ const canvas = document.getElementById('pawn-canvas');
 
 const styleSheet = document.createElement('style');
 
+let array = [];
+
 function rand(min, max) { 
     return Math.random() * (max - min) + min; 
 }
@@ -61,9 +63,16 @@ function spawnPiece(index) {
     });
 
     canvas.appendChild(img);
+    array.push(img);
 }
 
 export function initBackground() {
     document.head.appendChild(styleSheet);
     for (let i = 0; i < PIECE_COUNT; i++) spawnPiece(i);
+}
+
+export function resetBackground() {
+    styleSheet.remove();
+    array.forEach(img => img.remove());
+    array.length = 0;
 }

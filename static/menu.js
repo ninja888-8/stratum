@@ -1,7 +1,6 @@
 import { NUM_LEVELS } from './constants.js';
-import { initBackground } from './background.js';
 import { initStorage, getHighestBeatenLevel, getDifficultyStarsEarned, getChallengeStarsEarned } from './storage.js';
-import { initTheme, onBoardThemeChange, onPieceThemeChange } from './theme.js';
+import { initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, onPieceThemeChange } from './theme.js';
 import { populateLevelGrid, selectLevel, openLevelSidebar, closeLevelSidebar } from './levels.js';
 import { openSettings, closeSettings } from './settings.js';
 
@@ -34,7 +33,6 @@ function updateMenuMetrics() {
 }
 
 function initMenuPage() {
-    initBackground();
     initStorage();
     initTheme();
 
@@ -61,6 +59,8 @@ function initMenuPage() {
     // themes
     document.getElementById('boardThemeSelect').addEventListener('change', onBoardThemeChange);
     document.getElementById('pieceThemeSelect').addEventListener('change', onPieceThemeChange);
+    document.getElementById('backgroundColorSelect').addEventListener('change', onBackgroundColorChange);
+    document.getElementById('backgroundThemeSelect').addEventListener('change', onBackgroundThemeChange);
 
     // level select
     document.getElementById('level-select-btn').addEventListener('click', openLevelSidebar);

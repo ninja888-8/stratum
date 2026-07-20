@@ -9,7 +9,7 @@ import {
     getModifierList,
     isChallengeComplete, markChallengeComplete,
 } from './storage.js';
-import { initTheme, onBoardThemeChange, onPieceThemeChange } from './theme.js';
+import { initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, onPieceThemeChange } from './theme.js';
 import {
     currentLevel, selectLevel, unlockNextLevel, goToNextLevel,
     populateLevelGrid, openLevelSidebar, closeLevelSidebar,
@@ -648,6 +648,8 @@ function initGamePage() {
 
     document.getElementById('boardThemeSelect').addEventListener('change', onBoardThemeChange);
     document.getElementById('pieceThemeSelect').addEventListener('change', onPieceThemeChange);
+    document.getElementById('backgroundColorSelect').addEventListener('change', onBackgroundColorChange);
+    document.getElementById('backgroundThemeSelect').addEventListener('change', onBackgroundThemeChange);
 
     document.getElementById('engineSelect').addEventListener('change', onDifficultyChange);
 
@@ -657,7 +659,7 @@ function initGamePage() {
     document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
     document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
 
-    document.getElementById('home-btn').addEventListener('click', () => { window.location.href = '/'; });
+    document.getElementById('home-btn').addEventListener('click', () => { window.location.replace('/'); });
 
     // modifier 8: remove-piece button
     document.getElementById('remove-piece-btn').addEventListener('click', _enterRemovePieceMode);

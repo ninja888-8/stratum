@@ -1,4 +1,10 @@
-import { getBoardTheme, setBoardTheme, getPieceTheme, setPieceTheme } from './storage.js';
+import { initBackground, resetBackground } from './background.js';
+import { 
+    getBoardTheme, setBoardTheme, 
+    getPieceTheme, setPieceTheme, 
+    getBackgroundColor, setBackgroundColor, 
+    getBackgroundTheme, setBackgroundTheme, 
+} from './storage.js';
 
 export function applyBoardTheme(theme) {
     const dropdown = document.getElementById('boardThemeSelect');
@@ -63,6 +69,34 @@ export function applyPieceTheme(theme) {
     }
 }
 
+export function applyBackgroundColor(color) {
+    const colorPicker = document.getElementById('backgroundColorSelect');
+    if (colorPicker) colorPicker.value = color;
+
+    const root = document.documentElement;
+    root.style.setProperty('--bg-color', color);
+}
+
+export function applyBackgroundTheme(theme) {
+    const dropdown = document.getElementById('backgroundThemeSelect');
+    if (dropdown) dropdown.value = theme;
+
+    const root = document.documentElement;
+    switch (theme) {
+        case "color":
+            onBackgroundColorChange();
+            resetBackground();
+            break;
+        case "space":
+            initBackground();
+            break;
+        default:
+            onBackgroundColorChange();
+            resetBackground();
+            break;
+    }
+}
+
 export function onBoardThemeChange() {
     const dropdown = document.getElementById('boardThemeSelect');
     if (!dropdown) return;
@@ -77,7 +111,23 @@ export function onPieceThemeChange() {
     applyPieceTheme(dropdown.value);
 }
 
+export function onBackgroundColorChange() {
+    const colorPicker = document.getElementById('backgroundColorSelect');
+    if (!colorPicker) return;
+    setBackgroundColor(colorPicker.value);
+    applyBackgroundColor(colorPicker.value);
+}
+
+export function onBackgroundThemeChange() {
+    const dropdown = document.getElementById('backgroundThemeSelect');
+    if (!dropdown) return;
+    setBackgroundTheme(dropdown.value);
+    applyBackgroundTheme(dropdown.value);
+}
+
 export function initTheme() {
     applyBoardTheme(getBoardTheme());
     applyPieceTheme(getPieceTheme());
+    applyBackgroundColor(getBackgroundColor());
+    applyBackgroundTheme(getBackgroundTheme());
 }

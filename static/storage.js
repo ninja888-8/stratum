@@ -111,6 +111,22 @@ export function setPieceTheme(theme) {
     setString('selectedPieceTheme', theme);
 }
 
+export function getBackgroundColor() {
+    return getString('selectedBackgroundColor', '#ffffff');
+}
+
+export function setBackgroundColor(color) {
+    setString('selectedBackgroundColor', color);
+}
+
+export function getBackgroundTheme() {
+    return getString('selectedBackgroundTheme', 'space');
+}
+
+export function setBackgroundTheme(theme) {
+    setString('selectedBackgroundTheme', theme);
+}
+
 export function getModifierList() {
     return getInt('modifiersList', 0);
 }
@@ -152,14 +168,16 @@ export function setCurrentFEN(fen) {
 }
 
 export function initStorage() {
-    if (localStorage.getItem('highestBeatenLevel') === null) setHighestBeatenLevel(0);
-    if (localStorage.getItem('selectedBoardTheme') === null) setBoardTheme('classic');
-    if (localStorage.getItem('selectedPieceTheme') === null) setPieceTheme('white');
-    if (localStorage.getItem('difficultyStarsEarned') === null) setDifficultyStarsEarned(0);
-    if (localStorage.getItem('challengeStarsEarned') === null) setChallengeStarsEarned(0);
-    if (localStorage.getItem('difficultyStarsArray') === null) setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
-    if (localStorage.getItem('levelChallenges') === null) setLevelChallenges(Array(NUM_LEVELS).fill(0));
+    if (localStorage.getItem('highestBeatenLevel') === null)        setHighestBeatenLevel(0);
+    if (localStorage.getItem('selectedBoardTheme') === null)        setBoardTheme('classic');
+    if (localStorage.getItem('selectedPieceTheme') === null)        setPieceTheme('white');
+    if (localStorage.getItem('selectedBackgroundColor') === null)   setBackgroundColor('#ffffff');
+    if (localStorage.getItem('selectedBackgroundTheme') === null)   setBackgroundTheme('space');
+    if (localStorage.getItem('difficultyStarsEarned') === null)     setDifficultyStarsEarned(0);
+    if (localStorage.getItem('challengeStarsEarned') === null)      setChallengeStarsEarned(0);
+    if (localStorage.getItem('difficultyStarsArray') === null)      setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
+    if (localStorage.getItem('levelChallenges') === null)           setLevelChallenges(Array(NUM_LEVELS).fill(0));
 
-    if (localStorage.getItem('currentFEN') === null) setCurrentFEN('');
-    if (localStorage.getItem('currentLevel') === null) setCurrentLevel(0);
+    if (localStorage.getItem('currentFEN') === null)                setCurrentFEN('');
+    if (localStorage.getItem('currentLevel') === null)              setCurrentLevel(0);
 }

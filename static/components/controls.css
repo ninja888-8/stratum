@@ -9,7 +9,7 @@
     background: #f8f9fa;
     padding: 15px;
     border-radius: 5px;
-    border-left: 5px solid var(--bg-color);
+    border-left: 5px solid var(--box-color);
     margin-bottom: 20px;
 }
 
@@ -19,7 +19,7 @@
     margin-bottom: 10px;
     border: none;
     border-radius: 4px;
-    background: var(--bg-color);
+    background: var(--box-color);
     color: white;
     font-weight: bold;
     cursor: pointer;

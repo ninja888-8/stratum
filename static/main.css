@@ -13,7 +13,8 @@
 @import 'sidebar/settings.css';
 
 :root {
-    --bg-color: #2c3e50;
+    --bg-color: #ffffff;
+    --box-color: #2c3e50;
     --sidebar-bg: #ffffff;
     --board-dark: #b58863;
     --board-light: #f0d9b5;
@@ -30,7 +31,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #d5e1df;
+    background-color: var(--bg-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -41,6 +42,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     gap: 20px;
+    z-index: 1;
 }
 
 /* for board and the side console */

@@ -119,7 +119,7 @@ def make_move():
     target = data.get('to')
     promotion = data.get('promotion', '')
 
-    # combine move into UCI format (e.g., e2e4, or e7e8q)
+    # Combine move into UCI format (e.g., e2e4, or e7e8q)
     uci_move = source + target + promotion
 
     try:
@@ -221,10 +221,9 @@ if __name__ == '__main__':
     
     window = webview.create_window(
         title='stratum', 
-        url='http://127.0.0.1:5000', 
-        width=1920, 
-        height=1080,
-        resizable=True
+        url='http://127.0.0.1:5000',
+        fullscreen=True,
+        resizable=True,
     )
     window.events.closed += on_closed
     webview.start(icon=ICON_PATH, private_mode=False)
