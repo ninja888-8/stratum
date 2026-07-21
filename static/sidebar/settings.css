@@ -55,11 +55,21 @@
     gap: 8px;
 }
 
+.setting-item label {
+    gap: 16px;
+}
+
 .setting-item select {
     padding: 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
     font-size: 16px;
+}
+
+.setting-item input {
+    width: 260px;
+    height: 40px;
+    border: 1px solid #ccc;
 }
 
 .theme-select {
