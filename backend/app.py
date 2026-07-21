@@ -24,6 +24,9 @@ app = Flask(__name__, template_folder=TEMPLATES_PATH, static_folder=STATIC_PATH)
 CORS(app) 
 board = chess.Board()
 
+print(f"Looking for Stockfish at: {STOCKFISH_PATH}")
+print(f"Stockfish exists: {os.path.exists(STOCKFISH_PATH)}")
+
 def get_startupinfo():
     info = subprocess.STARTUPINFO()
     info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -210,6 +213,9 @@ def undo():
 def run_backend():
     app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
 
+def maximize(window):
+    window.maximize()
+
 if __name__ == '__main__':
     backend_thread = Thread(target=run_backend, daemon=True)
     backend_thread.start()
@@ -224,8 +230,7 @@ if __name__ == '__main__':
     window = webview.create_window(
         title='stratum', 
         url='http://127.0.0.1:5000',
-        fullscreen=True,
         resizable=True,
     )
     window.events.closed += on_closed
-    webview.start(icon=ICON_PATH, private_mode=False)
+    webview.start(maximize, window, icon=ICON_PATH, private_mode=False)
