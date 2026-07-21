@@ -1,1 +1,1 @@
-place "stockfish.exe" into this engine folder
+place "stockfish.exe" into this stockfish folder

@@ -33,6 +33,7 @@ def get_startupinfo():
 try:
     engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH, startupinfo=get_startupinfo())
 except Exception as e:
+    engine = None
     print(f"Error starting Stockfish: {e}")
 
 @app.route('/api/set_elo', methods=['POST'])
@@ -88,7 +89,8 @@ def get_game_state():
 def home():
     """Generates HTML webpage (home screen)"""
     global engine
-    engine.close()
+    if engine is not None:
+        engine.close()
     return render_template('index.html')
 
 @app.route('/game')
