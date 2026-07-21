@@ -15,9 +15,16 @@ if getattr(sys, 'frozen', False):
 else:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+if sys.platform == 'win32':
+    STOCKFISH_FILENAME = 'stockfish.exe'
+elif sys.platform == 'darwin':
+    STOCKFISH_FILENAME = 'stockfish-mac'
+else:
+    STOCKFISH_FILENAME = 'stockfish-linux'
+
 TEMPLATES_PATH = os.path.join(base_dir, 'templates')
 STATIC_PATH = os.path.join(base_dir, 'static')
-STOCKFISH_PATH = os.path.join(base_dir, 'engine', 'stockfish', 'stockfish.exe')
+STOCKFISH_PATH = os.path.join(base_dir, 'engine', 'stockfish', STOCKFISH_FILENAME)
 ICON_PATH = os.path.join(STATIC_PATH, 'images', 'icon.ico')
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH, static_folder=STATIC_PATH)
