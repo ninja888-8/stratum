@@ -28,10 +28,13 @@ print(f"Looking for Stockfish at: {STOCKFISH_PATH}")
 print(f"Stockfish exists: {os.path.exists(STOCKFISH_PATH)}")
 
 def get_startupinfo():
-    info = subprocess.STARTUPINFO()
-    info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    info.wShowWindow = subprocess.SW_HIDE
-    return info
+    if sys.platform == 'win32':
+        info = subprocess.STARTUPINFO()
+        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        info.wShowWindow = subprocess.SW_HIDE
+        return info
+    else:
+        return None
 
 try:
     engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH, startupinfo=get_startupinfo())
