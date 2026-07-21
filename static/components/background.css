@@ -1,4 +1,4 @@
-#pawn-canvas {
+#background-canvas {
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -16,7 +16,7 @@
     z-index: 1;
 }
 
-.floating-pawn {
+.floating {
     position: absolute;
     will-change: transform, opacity;
     z-index: 0;

@@ -1,4 +1,4 @@
-import { initBackground, resetBackground } from './background.js';
+import { initBackground } from './background.js';
 import { 
     getBoardTheme, setBoardTheme, 
     getPieceTheme, setPieceTheme, 
@@ -82,19 +82,8 @@ export function applyBackgroundTheme(theme) {
     if (dropdown) dropdown.value = theme;
 
     const root = document.documentElement;
-    switch (theme) {
-        case "color":
-            onBackgroundColorChange();
-            resetBackground();
-            break;
-        case "space":
-            initBackground();
-            break;
-        default:
-            onBackgroundColorChange();
-            resetBackground();
-            break;
-    }
+    if (theme == "color") onBackgroundColorChange();
+    initBackground();
 }
 
 export function onBoardThemeChange() {
