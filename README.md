@@ -18,31 +18,24 @@ singleplayer chess with a small twist (modifiers!)
 
 # standalone executable
 
-navigate to **releases* tab, and download the executable and run!
+navigate to *releases* tab, and download the executable and run!
 
 # local hosting
 
-(code located on the local branch of this repository)
+### stockfish installation:
 
-## requirements
-- python 3.8+, flask, chess
+from https://github.com/official-stockfish/Stockfish/releases, download the latest version of Stockfish for your operating system, extract, and place it located under engine/stockfish/[stockfish.exe / stockfish-mac / stockfish-linux]
 
-install required packages using
+for mac & linux, run the following command to ensure the file is executable
 ```
-pip install Flask chess
+$ chmod +x [stockfish name]
 ```
-
-### windows:
-
-from https://github.com/official-stockfish/Stockfish/releases, download the lastest version of Stockfish and ensure that the stockfish.exe binary is located under engine/stockfish/stockfish.exe
 
 ## usage
 ```
 $ python3 backend\app.py
 ```
-and simply navigate to localhost (http://127.0.0.1:5000/)
-
-(warning: game data remains cached in LocalStorage)
+(from the root directory) and you're all set!
 
 # web playable
 
