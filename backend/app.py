@@ -61,7 +61,7 @@ def set_stockfish_difficulty():
     })  
     return jsonify({"success": True,})
 
-def get_stockfish_move(current_board, depth=15, limit_time=0.5):
+def get_stockfish_move(current_board, depth=15, limit_time=1):
     """
     stockfish, asks it for the best move under specific constraints and makes the move
     """
@@ -156,26 +156,6 @@ def remove_piece():
     try:
         board.remove_piece_at(chess.parse_square(square))
         return jsonify({"success": True})
-    except ValueError:
-        return jsonify({"success": False})
-    
-@app.route('/api/check', methods=['POST'])
-def check_move():
-    data = request.json
-    source = data.get('from')
-    target = data.get('to')
-    promotion = data.get('promotion', '')
-
-    # combine move into UCI format (e2e4, e7e8q)
-    uci_move = source + target + promotion
-    try:
-        move = chess.Move.from_uci(uci_move)
-        legal_uci_strings = [move.uci() for move in board.legal_moves]
-        # check if the move is among legal moves
-        if uci_move in legal_uci_strings:
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False})
     except ValueError:
         return jsonify({"success": False})
     

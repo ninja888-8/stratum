@@ -45,23 +45,24 @@ export const STARTING_POSITIONS = [
     "r2q1rk1/ppp2ppp/2n2n2/8/8/8/PPPP1PPP/RN1QKBNR w KQ - 0 1",
     "r1bqkb1r/pp1pp1pp/2p2p2/8/2BPPB2/8/PPPQ1PPP/3RR1K1 w kq - 0 1",
     "r2qk2r/1pp2ppp/8/8/4P3/P2P4/1PP2PPP/R2Q1RK1 w kq - 0 1",
-    "2bq1qk1/ppp2ppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQ - 0 1",
-
     "3qk3/pppppppp/8/8/8/8/PPPPPPPP/1NB1KBN1 w - - 0 1",
-    "r1bqk2r/pp4pp/2nb4/2p1pp2/3p4/3P1N2/PPP1BPPP/RNBQK2R w KQkq - 0 1",
+    
+    "2bq1qk1/ppp2ppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQ - 0 1",
     "3rr1k1/5pp1/7p/2pp4/8/P6P/1PP2PP1/R2R2K1 w - - 0 1",
     "4r3/p4kp1/1p3b1p/8/6P1/1P1P1N1P/2P2PK1/3R4 w - - 0 1",
+    "r1bqk2r/pp4pp/2nb4/2p1pp2/3p4/3P1N2/PPP1BPPP/RNBQK2R w KQkq - 0 1",
     "8/pp1kn1p1/2n2bp1/8/8/1PNP2PP/2PB1PB1/6K1 w - - 0 1",
     
     "6k1/pp2npbp/2n1b1p1/8/8/P1NNB1P1/1PP2PBP/6K1 w - - 0 1",
     "r1bqrnk1/p3bpp1/1p3n1p/2pp4/3P2PB/2NBPN1P/PPQ2P2/2KR3R w - - 0 1",
     "r1bq2k1/pp2p2p/2np2pB/5r2/2Pb4/2N5/PP2BPPP/R2Q1RK1 w - - 0 1",
     "r1bq1rk1/pp2ppbp/3p1np1/2pPn3/2P1P3/2N1BP2/PP1Q2PP/R3KBNR w KQ - 0 1",
-    "rnbqkbnr/pppppppp/8/8/1PPPPPP1/PBN2NBP/PPPPPPPP/4K3 w kq - 0 1",
+    "r2qk2r/ppp2ppp/3pp3/8/8/8/2NNNNN1/1NNNKNN1 w kq - 0 1",
 ];
 
 // TODO: will add challenges names
 export const CHALLENGES = [
+
 ];
 
 export const CHALLENGES_REQUIRED_MODIFIERS_LIST = [
@@ -80,20 +81,20 @@ export const CHALLENGES_REQUIRED_MODIFIERS_LIST = [
     [-1,49153,0],
     [16416,65552,1088],
     [0,-1,256],
-    [131088,-1,1],
-    [65536,262400,-1],
-
+    [131088,-1,0],
     [-1,0,13312],
-    [131328,262144,0],
+
+    [65536,262400,-1],
     [131120,-1,0],
     [0,8260,4096],
-    [5120,131200,4097],
+    [131328,262144,0],
+    [5120,131200,135169],
 
     [-1,0,16],
     [1664,2080,131080],
     [49280,320,32772],
     [0,16,2064],
-    [524289,61584,143664],
+    [524289,487432,263168],
 ]
 
 export const CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER = [
@@ -113,11 +114,11 @@ export const CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER = [
     [0,0,0],
     [0,1.25,0],
     [0,2,0],
-    [0,0,1.25],
-
     [2,0,0],
-    [0,0,0],
+    
+    [0,0,1.25],
     [0,2,0],
+    [0,0,0],
     [0,0,0],
     [0,0,0],
 

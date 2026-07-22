@@ -26,8 +26,9 @@ import { openSettings, closeSettings, onDifficultyChange } from './settings.js';
 const boardElement = document.getElementById('chessboard');
 let selectedSquare = null;
 let isGameConfirmed = false;
-
 let removePieceMode = false; // modifier 8: true while awaiting opponent piece click
+let legalMoves = null;
+let gameState = null;
 
 function createBoard() {
     boardElement.innerHTML = '';
@@ -59,14 +60,14 @@ function createBoard() {
 }
 
 async function updateBoard(fromPreviousFEN = false) {
-    const response = await fetch(`${API_URL}/state`);
-    const data = await response.json();
+    gameState = await (await fetch(`${API_URL}/state`)).json();
+    legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
 
     const fenRows = fromPreviousFEN
         ? getCurrentFEN().split(' ')[0].split('/')
-        : data.fen.split(' ')[0].split('/');
+        : gameState.fen.split(' ')[0].split('/');
 
-    if (!fromPreviousFEN) setCurrentFEN(data.fen);
+    if (!fromPreviousFEN) setCurrentFEN(gameState.fen);
 
     // Expand FEN rows into a flat 64-element array of piece characters
     const flatBoard = [];
@@ -82,17 +83,16 @@ async function updateBoard(fromPreviousFEN = false) {
         squares[idx].textContent = PIECE_MAP[piece] ?? '';
 
         // Highlight king in check
-        const inCheck = data.is_check;
+        const inCheck = gameState.is_check;
         if (piece === 'k' && inCheck === 'b') squares[idx].classList.add('check');
         else if (piece === 'K' && inCheck === 'w') squares[idx].classList.add('check');
         else squares[idx].classList.remove('check');
     });
 
-    document.getElementById('status').innerText = data.status_text;
-    const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
+    document.getElementById('status').innerText = gameState.status_text;
 
-    if (data.is_game_over) {
-        const playerWon = data.turn === 'b';
+    if (gameState.is_game_over) {
+        const playerWon = gameState.turn === 'b';
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
@@ -109,7 +109,7 @@ async function updateBoard(fromPreviousFEN = false) {
             let rank = parseInt(legalMoves[i][1]);
             if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false;
         }
-        const playerWon = data.is_check != "w";
+        const playerWon = gameState.is_check != "w";
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
@@ -127,9 +127,6 @@ async function handleSquareClick(square) {
         if (await _handleSquareRemoveClick(square)) useRemovePiece();
         return;
     }
-
-    const response = await fetch(`${API_URL}/state`);
-    const data = await response.json();
 
     if (selectedSquare) {
         const from = selectedSquare.dataset.file + selectedSquare.dataset.rank;
@@ -157,10 +154,11 @@ async function handleSquareClick(square) {
 
             const isLegal = await _checkLegalMove(from, to, 'q');
             if (isLegal && square.textContent != '♚') {
-                await _showPromotionDialog(from, to, data.turn);
+                await _showPromotionDialog(from, to, gameState.turn);
                 _clearSelection();
             }
-        } else {
+        } 
+        else {
             const isLegal = await _checkLegalMove(from, to, '');
             if (isLegal && square.textContent != '♚') {
                 if (bannedPieces.includes(selectedSquare.textContent)) return;
@@ -169,13 +167,13 @@ async function handleSquareClick(square) {
                 isGameOver = await updateBoard(false);
                 _clearSelection();
             }
-            else if (_isCurrentPlayerPiece(square, data)) {
+            else if (_isCurrentPlayerPiece(square, gameState)) {
                 _clearSelection();
-                _selectSquare(square, data);
+                _selectSquare(square, gameState);
             }
         }
     } else {
-        await _selectSquare(square, data);
+        await _selectSquare(square, gameState);
     }
 }
 
@@ -193,7 +191,6 @@ async function _selectSquare(square, gameState) {
     // cannot move piece due to modifier
     if (bannedPieces.includes(selectedSquare.textContent)) return;
 
-    const legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
     const squares = document.querySelectorAll('.square');
 
     for (let i = 0; i < 64; i++) {
@@ -281,13 +278,8 @@ async function _handleSquareRemoveClick(square) {
 }
 
 async function _checkLegalMove(from, to, promotion) {
-    const res = await fetch(`${API_URL}/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to, promotion }),
-    });
-    const data = await res.json();
-    return data.success;
+    const uciString = from + to + promotion;
+    return legalMoves.includes(uciString);
 }
 
 async function _sendMove(from, to, promotion) {
@@ -370,7 +362,7 @@ async function newGame() {
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen, extraPiece: null }),
+        body: JSON.stringify({ fen }),
     });
 
     await updateBoard(false);
@@ -598,7 +590,7 @@ function showGameOverModal(playerWon, difficulty) {
         });
     }
 
-    if (playerWon) document.getElementById('next-level-btn').style.display = '';
+    if (playerWon && currentLevel != 25) document.getElementById('next-level-btn').style.display = '';
     else document.getElementById('next-level-btn').style.display = 'none';
 
     modal.classList.remove('hidden');
@@ -619,11 +611,10 @@ function initGamePage() {
 
     populateLevelGrid(_gameLevelClickHandler);
     createBoard();
+    newGame();
+
     if (getCurrentFEN() != '') updateBoard(true);
-    else {
-        newGame();
-        releaseSettings();
-    }
+    else releaseSettings();
 
     if (isInGame()) confirmSettings();
     else {

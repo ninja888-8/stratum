@@ -159,7 +159,7 @@ function applyButtonDisabling() {
                     if (target && target != btn) {
                         target.disabled = true;
                         target.classList.add('btn-locked');
-                        target.style.opacity = '0.3'; // specific styling for disabled buttons due to button block rules
+                        target.style.opacity = '0.45'; // specific styling for disabled buttons due to button block rules
                     }
                 })
             }
