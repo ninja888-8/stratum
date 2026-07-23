@@ -59,9 +59,11 @@ function createBoard() {
     }
 }
 
-async function updateBoard(fromPreviousFEN = false) {
-    gameState = await (await fetch(`${API_URL}/state`)).json();
-    legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
+async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
+    if (fromPreviousFEN || sendAPIRequest) {
+        gameState = await (await fetch(`${API_URL}/state`)).json();
+        legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
+    }
 
     const fenRows = fromPreviousFEN
         ? getCurrentFEN().split(' ')[0].split('/')
@@ -92,7 +94,9 @@ async function updateBoard(fromPreviousFEN = false) {
     document.getElementById('status').innerText = gameState.status_text;
 
     if (gameState.is_game_over) {
-        const playerWon = gameState.turn === 'b';
+        setCurrentFEN('');
+        const playerWon = !gameState.is_draw;
+        console.log(gameState.is_draw);
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
@@ -109,7 +113,7 @@ async function updateBoard(fromPreviousFEN = false) {
             let rank = parseInt(legalMoves[i][1]);
             if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false;
         }
-        const playerWon = gameState.is_check != "w";
+        const playerWon = !gameState.is_draw;
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
@@ -138,8 +142,6 @@ async function handleSquareClick(square) {
             return;
         }
 
-        let isGameOver = false;
-
         const isPawnPromotion =
             (selectedSquare.textContent === '♟' && square.dataset.rank === '1') ||
             (selectedSquare.textContent === '♙' && square.dataset.rank === '8');
@@ -163,8 +165,8 @@ async function handleSquareClick(square) {
             if (isLegal && square.textContent != '♚') {
                 if (bannedPieces.includes(selectedSquare.textContent)) return;
 
-                await _sendMove(from, to, '');
-                isGameOver = await updateBoard(false);
+                let isGameOver = await _sendMove(from, to, '');
+                await updateBoard(false, isGameOver);
                 _clearSelection();
             }
             else if (_isCurrentPlayerPiece(square, gameState)) {
@@ -272,7 +274,7 @@ async function _handleSquareRemoveClick(square) {
     await updateBoard(false);
 
     await _requestStockfishMove();
-    await updateBoard();
+    await updateBoard(false);
 
     return true;
 }
@@ -283,11 +285,12 @@ async function _checkLegalMove(from, to, promotion) {
 }
 
 async function _sendMove(from, to, promotion) {
-    await fetch(`${API_URL}/move`, {
+    const response = await fetch(`${API_URL}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to, promotion }),
     });
+    const data = await response.json();
     
     // modifier 6, skip stockfish move
     if (extraPlayerMoves > 0) {
@@ -304,6 +307,10 @@ async function _sendMove(from, to, promotion) {
         await updateBoard(false);
         await _requestStockfishMove();
     }
+
+    console.log(data.state);
+    console.log(data.state.is_game_over);
+    return data.state.is_game_over;
 }
 
 async function _showPromotionDialog(from, to, turn) {
@@ -323,8 +330,8 @@ async function _showPromotionDialog(from, to, turn) {
             document.getElementById('promotionOverlay').style.display = 'none';
             const isLegal = await _checkLegalMove(from, to, pieces[i]);
             if (isLegal) {
-                await _sendMove(from, to, pieces[i]);
-                await updateBoard(false);
+                let isGameOver = await _sendMove(from, to, pieces[i]);
+                await updateBoard(false, isGameOver);
             }
         };
     });
@@ -340,7 +347,7 @@ async function _requestStockfishMove(count = 1) {
             const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                const isOver = await updateBoard(false);
+                const isOver = await updateBoard(false, true);
                 if (isOver) return;
             }
             else console.warn('Stockfish failed to move:', data.message);
@@ -358,14 +365,14 @@ async function newGame() {
         s.classList.remove('moveable', 'selected');
     });
 
-    const fen = STARTING_POSITIONS[currentLevel-1];
+    const fen = getCurrentFEN() == '' ? STARTING_POSITIONS[currentLevel-1] : getCurrentFEN();
     await fetch(`${API_URL}/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fen }),
     });
 
-    await updateBoard(false);
+    await updateBoard(false, true);
 }
 
 async function resetGame() {
@@ -408,7 +415,7 @@ async function resetGame() {
         body: JSON.stringify({ fen }),
     });
 
-    await updateBoard(false);
+    await updateBoard(false, true);
  
     // modifier 15: engine fires extra moves at the start before the player goes
     if (extraEngineMoves > 0) {
@@ -600,7 +607,7 @@ function _gameLevelClickHandler(levelId) {
     selectLevel(levelId);
     updateChallengePanel();
     resetModifiers();
-    newGame();
+    resetGame();
     releaseSettings();
 }
 
@@ -644,7 +651,7 @@ function initGamePage() {
 
     document.getElementById('engineSelect').addEventListener('change', onDifficultyChange);
 
-    document.getElementById('new-game').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
+    document.getElementById('new-game').addEventListener('click', () => { resetModifiers(); resetGame(); initModifiers(); releaseSettings(); });
     document.getElementById('undo-btn').addEventListener('click', () => { undoMove(); });
 
     document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
