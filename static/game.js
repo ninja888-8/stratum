@@ -95,8 +95,7 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
 
     if (gameState.is_game_over) {
         setCurrentFEN('');
-        const playerWon = !gameState.is_draw;
-        console.log(gameState.is_draw);
+        const playerWon = !gameState.is_draw && gameState.turn === 'b';
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
@@ -111,16 +110,11 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
         for (let i = 0; i < legalMoves.length; i++) {
             let file = legalMoves[i].charCodeAt(0) - "a".charCodeAt(0);
             let rank = parseInt(legalMoves[i][1]);
-            if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false;
+            if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false; // player did not lose yet
         }
-        const playerWon = !gameState.is_draw;
-        if (playerWon) {
-            unlockNextLevel();
-            populateLevelGrid(_gameLevelClickHandler);
-            _recordCompletions();
-            updateChallengePanel();
-        }
-        showGameOverModal(playerWon, document.getElementById('engineSelect').value);
+
+        // otherwise no legal moves, so game over player loses
+        showGameOverModal(false, document.getElementById('engineSelect').value);
         return true;
     }
 }
@@ -301,15 +295,13 @@ async function _sendMove(from, to, promotion) {
             _setStatus("last bonus move used.");
         }
         await fetch(`${API_URL}/skip_move`, { method: 'POST' });
-        await updateBoard(false);
+        await updateBoard(false, true);
     } else {
         _clearSelection();
         await updateBoard(false);
         await _requestStockfishMove();
     }
 
-    console.log(data.state);
-    console.log(data.state.is_game_over);
     return data.state.is_game_over;
 }
 
@@ -435,7 +427,7 @@ async function undoMove() {
         const data = await response.json();
 
         await fetch(`${API_URL}/undo`, { method: 'POST' });
-        await updateBoard(false);
+        await updateBoard(false, true);
         if (data.success) // successfully undid move
             useUndoButton();
     }
