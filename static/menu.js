@@ -1,8 +1,10 @@
 import { NUM_LEVELS } from './constants.js';
 import { initStorage, getHighestBeatenLevel, getDifficultyStarsEarned, getChallengeStarsEarned } from './storage.js';
-import { initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, onPieceThemeChange } from './theme.js';
+import { 
+    initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, 
+    onEngineSquareColorChange, onInCheckSquareColorChange, onMoveableSquareColorChange, onPieceThemeChange, onSelectedSquareColorChange } from './theme.js';
 import { populateLevelGrid, selectLevel, openLevelSidebar, closeLevelSidebar } from './levels.js';
-import { openSettings, closeSettings } from './settings.js';
+import { openSettings, closeSettings, openResetConfirmation, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied } from './settings.js';
 
 function openInstructions() {
     document.getElementById('instructionsModal').classList.remove('hidden');
@@ -61,6 +63,16 @@ function initMenuPage() {
     document.getElementById('pieceThemeSelect').addEventListener('change', onPieceThemeChange);
     document.getElementById('backgroundColorSelect').addEventListener('change', onBackgroundColorChange);
     document.getElementById('backgroundThemeSelect').addEventListener('change', onBackgroundThemeChange);
+    document.getElementById('checkSquareColorSelect').addEventListener('change', onInCheckSquareColorChange);
+    document.getElementById('selectedSquareColorSelect').addEventListener('change', onSelectedSquareColorChange);
+    document.getElementById('moveableSquareColorSelect').addEventListener('change', onMoveableSquareColorChange);
+    document.getElementById('engineSquareColorSelect').addEventListener('change', onEngineSquareColorChange);
+
+    // reset data
+    document.getElementById('reset-btn').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
+    document.getElementById('resetModal').addEventListener('click', onResetConfirmationBackdropClick);
+    document.getElementById('reset-yes').addEventListener('click', onResetConfirmed);
+    document.getElementById('reset-no').addEventListener('click', onResetDenied);
 
     // level select
     document.getElementById('level-select-btn').addEventListener('click', openLevelSidebar);

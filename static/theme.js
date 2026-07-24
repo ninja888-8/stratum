@@ -4,6 +4,10 @@ import {
     getPieceTheme, setPieceTheme, 
     getBackgroundColor, setBackgroundColor, 
     getBackgroundTheme, setBackgroundTheme, 
+    getInCheckSquareColor, setInCheckSquareColor,
+    getSelectedSquareColor, setSelectedSquareColor,
+    getMoveableSquareColor, setMoveableSquareColor,
+    getEngineSquareColor, setEngineSquareColor,
 } from './storage.js';
 
 export function applyBoardTheme(theme) {
@@ -86,6 +90,38 @@ export function applyBackgroundTheme(theme) {
     initBackground();
 }
 
+export function applyInCheckSquareColor(color) {
+    const colorPicker = document.getElementById('checkSquareColorSelect');
+    if (colorPicker) colorPicker.value = color;
+
+    const root = document.documentElement;
+    root.style.setProperty('--board-check', color);
+}
+
+export function applySelectedSquareColor(color) {
+    const colorPicker = document.getElementById('selectedSquareColorSelect');
+    if (colorPicker) colorPicker.value = color;
+
+    const root = document.documentElement;
+    root.style.setProperty('--board-selected', color);
+}
+
+export function applyMoveableSquareColor(color) {
+    const colorPicker = document.getElementById('moveableSquareColorSelect');
+    if (colorPicker) colorPicker.value = color;
+
+    const root = document.documentElement;
+    root.style.setProperty('--board-moveable', color);
+}
+
+export function applyEngineSquareColor(color) {
+    const colorPicker = document.getElementById('engineSquareColorSelect');
+    if (colorPicker) colorPicker.value = color;
+
+    const root = document.documentElement;
+    root.style.setProperty('--board-engine', color);
+}
+
 export function onBoardThemeChange() {
     const dropdown = document.getElementById('boardThemeSelect');
     if (!dropdown) return;
@@ -114,9 +150,41 @@ export function onBackgroundThemeChange() {
     applyBackgroundTheme(dropdown.value);
 }
 
+export function onInCheckSquareColorChange() {
+    const colorPicker = document.getElementById('checkSquareColorSelect');
+    if (!colorPicker) return;
+    setBackgroundColor(colorPicker.value);
+    applyInCheckSquareColor(colorPicker.value);
+}
+
+export function onSelectedSquareColorChange() {
+    const colorPicker = document.getElementById('selectedSquareColorSelect');
+    if (!colorPicker) return;
+    setSelectedSquareColor(colorPicker.value);
+    applySelectedSquareColor(colorPicker.value);
+}
+
+export function onMoveableSquareColorChange() {
+    const colorPicker = document.getElementById('moveableSquareColorSelect');
+    if (!colorPicker) return;
+    setMoveableSquareColor(colorPicker.value);
+    applyMoveableSquareColor(colorPicker.value);
+}
+
+export function onEngineSquareColorChange() {
+    const colorPicker = document.getElementById('engineSquareColorSelect');
+    if (!colorPicker) return;
+    setEngineSquareColor(colorPicker.value);
+    applyEngineSquareColor(colorPicker.value);
+}
+
 export function initTheme() {
     applyBoardTheme(getBoardTheme());
     applyPieceTheme(getPieceTheme());
     applyBackgroundColor(getBackgroundColor());
     applyBackgroundTheme(getBackgroundTheme());
+    applyInCheckSquareColor(getInCheckSquareColor());
+    applySelectedSquareColor(getSelectedSquareColor());
+    applyMoveableSquareColor(getMoveableSquareColor());
+    applyEngineSquareColor(getEngineSquareColor());
 }

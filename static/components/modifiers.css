@@ -24,27 +24,27 @@
 /* row container for splitting buttons */
 .console-row {
     display: flex;
-    gap: 10px; /* space between buttons in the row */
+    gap: 10px;
     width: 100%;
 }
 
 .console-btn {
     position: relative; 
+    display: flex;
     flex: 1; /* split space evenly inside a .console-row */
-    color: #ffffff;
     border: none;
-    padding: 8px 8px;
-    font-size: 14px;
-    font-weight: bold;
     border-radius: 3px;
+    width: 48px;
+    height: 48px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    text-align: center;
+    justify-content: center;
+    align-items: center;
     z-index: 1;
 }
 
 .console-btn:active {
-    transform: scale(0.97); /* compression feedback */
+    transform: scale(0.97);
 }
 
 .console-btn:hover {
@@ -118,7 +118,15 @@
     opacity: 1;
 }
 
-/* uniform button image icon */
+.no-space {
+    color: #000000;
+    font-size: 12px;
+    font-weight: bold;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+}
+
 .btn-icon {
     height: 32px;
     width: auto; 

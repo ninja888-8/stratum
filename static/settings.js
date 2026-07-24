@@ -1,4 +1,5 @@
 import { API_URL, DIFFICULTY_ELO } from './constants.js';
+import { resetAllData } from './storage.js';
 import { onBoardThemeChange, onPieceThemeChange } from './theme.js';
 
 export function openSettings() {
@@ -37,4 +38,22 @@ export async function onDifficultyChange() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ elo: stockfish_elo }),
     });
+}
+
+export function openResetConfirmation() {
+    document.getElementById('resetModal').classList.remove('hidden');
+}
+
+export function onResetConfirmationBackdropClick(event) {
+    if (event.target === document.getElementById('resetModal')) {
+        document.getElementById('resetModal').classList.add('hidden');
+    }
+}
+
+export function onResetConfirmed() {
+    resetAllData();
+}
+
+export function onResetDenied() {
+    document.getElementById('resetModal').classList.add('hidden');
 }

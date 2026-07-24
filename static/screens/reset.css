@@ -1,0 +1,73 @@
+.reset-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.reset-modal-overlay.hidden {
+    display: none;
+    pointer-events: none;
+}
+
+.reset-modal-content {
+    background-color: #e2e2e2;
+    border: 1px solid #333;
+    border-radius: 8px;
+    width: 10vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+}
+
+.reset-modal-header {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-align: center;
+    color: #000000;
+}
+
+.confirmation-btn {
+    height: 4vw;
+    width: 4vw;
+    font-size: 1.5vw;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+#reset-yes {
+    background-color: #ade0af;
+    border: 2px solid #58ec44;
+}
+
+#reset-no {
+    background-color: #e0b3ad;
+    border: 2px solid #ec5544;
+}
+
+#reset-btn {
+    height: 40px;
+    border-radius: 4px;
+    background-color: #e0b3ad;
+    border: 2px solid #ec5544;
+    margin-top: auto;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#reset-btn:hover {
+    background-color: #e79a90;
+    transform: scale(1.03);
+}

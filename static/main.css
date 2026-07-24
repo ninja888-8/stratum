@@ -9,6 +9,7 @@
 @import 'screens/gameover.css';
 @import 'screens/instructions.css';
 @import 'screens/menu.css';
+@import 'screens/reset.css';
 @import 'sidebar/levels.css';
 @import 'sidebar/settings.css';
 
@@ -22,6 +23,7 @@
     --board-selected: #7b9652;
     --board-check: #f56464;
     --board-moveable: #bbfcdb;
+    --board-engine: #c1bbfc;
     --highlight: rgba(255, 255, 0, 0.4);
 }
 
@@ -49,8 +51,8 @@ body {
 .game-wrapper {
     display: flex;
     justify-content: center;
-    align-items: stretch; /* forces console to match board height */
-    gap: 0; /* keeps them attached w/ no gap */
+    align-items: stretch;
+    gap: 0;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);

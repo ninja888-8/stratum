@@ -129,7 +129,7 @@ export function initBackground() {
             case "space":
                 spawnPiece(i);
                 break;
-            case "ocean":
+            case "bubble":
                 spawnBubble(i);
                 break;
             default:

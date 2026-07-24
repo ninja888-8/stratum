@@ -106,44 +106,64 @@
 <!-- settings menu -->
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 <div id="settingsSidebar" class="settings-sidebar">
-    <div class="sidebar-header">
-        <h3>Game Settings</h3>
-        <button class="close-sidebar-btn" id="close-settings-btn">×</button>
+    <div class="settings-wrapper">
+        <div class="sidebar-header">
+            <h3>Game Settings</h3>
+            <button class="close-sidebar-btn" id="close-settings-btn">×</button>
+        </div>
+        
+        <!-- specific settings -->
+        <div class="setting-item">
+            <label for="themeSelect">Board Theme:</label>
+            <select id="boardThemeSelect">
+                <option value="classic">Classic</option>
+                <option value="green">Tournament Green</option>
+                <option value="red">Picnic Red</option>
+                <option value="blue">Ocean Blue</option>
+                <option value="purple">Pale Purple</option>
+            </select>
+
+            <label for="themeSelect">Board Piece Highlight:</label>
+            <select id="pieceThemeSelect">
+                <option value="white">White</option>
+                <option value="green">Green</option>
+                <option value="red">Red</option>
+                <option value="blue">Blue</option>
+                <option value="purple">Purple</option>
+                <option value="none">None</option>
+            </select>
+
+            <hr class="modal-divider">
+
+            <label for="bgSelect">Game Background Color:</label>
+            <input type="color" id="backgroundColorSelect" value="#ffffff">
+
+            <label for="bgSelect">Game Background Theme:</label>
+            <select id="backgroundThemeSelect">
+                <option value="color">None</option>
+                <option value="space">Space</option>
+                <option value="bubble">Bubble</option>
+            </select>
+
+            <hr class="modal-divider">
+            
+            <label for="squareBgSelect">Board In-Check Square Color:</label>
+            <input type="color" id="checkSquareColorSelect" value="#f56464">
+
+            <label for="squareBgSelect">Board Selected Square Color:</label>
+            <input type="color" id="selectedSquareColorSelect" value="#7b9652">
+
+            <label for="squareBgSelect">Board Moveable Squares Color:</label>
+            <input type="color" id="moveableSquareColorSelect" value="#bbfcdb">
+
+            <label for="squareBgSelect">Board Engine Move Square Color:</label>
+            <input type="color" id="engineSquareColorSelect" value="#c1bbfc">
+        </div>
     </div>
-    
-    <!-- specific settings -->
-    <div class="setting-item">
-        <label for="themeSelect">Board Theme:</label>
-        <select id="boardThemeSelect">
-            <option value="classic">Classic</option>
-            <option value="green">Tournament Green</option>
-            <option value="red">Picnic Red</option>
-            <option value="blue">Ocean Blue</option>
-            <option value="purple">Pale Purple</option>
-        </select>
 
-        <label for="themeSelect">Board Piece Highlight:</label>
-        <select id="pieceThemeSelect">
-            <option value="white">White</option>
-            <option value="green">Green</option>
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
-            <option value="purple">Purple</option>
-            <option value="none">None</option>
-        </select>
-
-        <hr class="modal-divider">
-
-        <label for="bgSelect">Game Background Color:</label>
-        <input type="color" id="backgroundColorSelect" value="#ffffff">
-
-        <label for="bgSelect">Game Background Theme:</label>
-        <select id="backgroundThemeSelect">
-            <option value="color">None</option>
-            <option value="space">Space</option>
-            <option value="ocean">Ocean</option>
-        </select>
-    </div>
+    <div class="settings-footer">
+        <button id="reset-btn">Click to Reset All Game Data</button>
+    </div> 
 </div>
 
 <!-- level select menu -->
@@ -157,6 +177,16 @@
     <div class="level-container">
         <div id="levelGrid" class="level-grid">
             <!-- buttons added through Javascript -->
+        </div>
+    </div>
+</div>
+
+<div id="resetModal" class="reset-modal-overlay hidden">
+    <div class="reset-modal-content">
+        <h2 class="reset-modal-header">are you sure?</h2>
+        <div class="reset-btn-container">
+            <button class="confirmation-btn" id="reset-yes">yes</button>
+            <button class="confirmation-btn" id="reset-no">no</button>
         </div>
     </div>
 </div>

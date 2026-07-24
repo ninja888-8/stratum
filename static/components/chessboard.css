@@ -50,4 +50,5 @@
 .square.dark { background-color: var(--board-dark); }
 .square.selected { background-color: var(--board-selected) !important; }
 .square.check { background-color: var(--board-check); }
+.square.engine { background-color: var(--board-engine); }
 .square.moveable { background-color: var(--board-moveable); }

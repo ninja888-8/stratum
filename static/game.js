@@ -9,7 +9,9 @@ import {
     getModifierList,
     isChallengeComplete, markChallengeComplete,
 } from './storage.js';
-import { initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, onPieceThemeChange } from './theme.js';
+import { 
+    initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, 
+    onEngineSquareColorChange, onInCheckSquareColorChange, onMoveableSquareColorChange, onPieceThemeChange, onSelectedSquareColorChange } from './theme.js';
 import {
     currentLevel, selectLevel, unlockNextLevel, goToNextLevel,
     populateLevelGrid, openLevelSidebar, closeLevelSidebar,
@@ -21,10 +23,12 @@ import { useUndoButton, useExtraPlayerMoves, useRemovePiece,
          scrambleFirstRank, removeHalfPieces, movePiecesUp, reflectFirstRanks, noPromotion, extraEngineMoves, removeFourPieces,
          applyExtraPiece, applyScramble, applyRemovePieces, applyMovePiecesUp, applyReflectFirstRanks,
 } from './modifiers.js';
-import { openSettings, closeSettings, onDifficultyChange } from './settings.js';
+import { openSettings, closeSettings, onDifficultyChange, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied, openResetConfirmation } from './settings.js';
 
 const boardElement = document.getElementById('chessboard');
+let squares = null; // all chessboard squares;
 let selectedSquare = null;
+let engineLastMove = null; // in UCI
 let isGameConfirmed = false;
 let removePieceMode = false; // modifier 8: true while awaiting opponent piece click
 let legalMoves = null;
@@ -57,6 +61,8 @@ function createBoard() {
 
         boardElement.appendChild(square);
     }
+
+    squares = document.querySelectorAll('.square');
 }
 
 async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
@@ -80,7 +86,6 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
         }
     }
 
-    const squares = document.querySelectorAll('.square');
     flatBoard.forEach((piece, idx) => {
         squares[idx].textContent = PIECE_MAP[piece] ?? '';
 
@@ -108,9 +113,8 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
     else {
         // check if due to modifier, is stalemate or checkmate
         for (let i = 0; i < legalMoves.length; i++) {
-            let file = legalMoves[i].charCodeAt(0) - "a".charCodeAt(0);
-            let rank = parseInt(legalMoves[i][1]);
-            if (!bannedPieces.includes(squares[file + 8*(8-rank)].textContent)) return false; // player did not lose yet
+            let move = _parseUCIMove(legalMoves[i]);
+            if (!bannedPieces.includes(squares[move[0]].textContent)) return false; // player did not lose yet
         }
 
         // otherwise no legal moves, so game over player loses
@@ -187,8 +191,6 @@ async function _selectSquare(square, gameState) {
     // cannot move piece due to modifier
     if (bannedPieces.includes(selectedSquare.textContent)) return;
 
-    const squares = document.querySelectorAll('.square');
-
     for (let i = 0; i < 64; i++) {
         const row = Math.floor(i / 8);
         const col = i % 8;
@@ -214,7 +216,7 @@ async function _selectSquare(square, gameState) {
 function _clearSelection() {
     selectedSquare?.classList.remove('selected');
     selectedSquare = null;
-    document.querySelectorAll('.square').forEach(s => s.classList.remove('moveable'));
+    squares.forEach(s => s.classList.remove('moveable'));
 }
 
 /** Returns true if the piece on `square` belongs to the player whose turn it is. */
@@ -228,13 +230,20 @@ function _isOpponentPiece(square, gameState) {
     return square.textContent !== '' && !_isCurrentPlayerPiece(square, gameState);
 }
 
+function _parseUCIMove(uciMove) {
+    return [
+        (uciMove.charCodeAt(0) - "a".charCodeAt(0)) + 8 * (8 - parseInt(uciMove[1])),
+        (uciMove.charCodeAt(2) - "a".charCodeAt(0)) + 8 * (8 - parseInt(uciMove[3]))
+    ]
+}
+
 /** highlights all enemy pieces and waits for a click to remove the piece */
 function _enterRemovePieceMode() {
     removePieceMode = true;
     _setStatus('Click an opponent piece to remove it from the game (takes up your turn). Click elsewhere on the board to cancel.');
  
     // highlight all non-king opponent pieces
-    document.querySelectorAll('.square').forEach(sq => {
+    squares.forEach(sq => {
         const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♟']);
         if (blackUnicode.has(sq.textContent)) sq.classList.add('moveable');
     });
@@ -244,7 +253,7 @@ function _enterRemovePieceMode() {
 async function _handleSquareRemoveClick(square) {
     const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♚', '♟']);
     removePieceMode = false;
-    document.querySelectorAll('.square').forEach(s => s.classList.remove('moveable'));
+    squares.forEach(s => s.classList.remove('moveable'));
 
     // Only allow removing actual enemy pieces (not the king)
     if (!blackUnicode.has(square.textContent) || square.textContent === '♚') {
@@ -330,7 +339,7 @@ async function _showPromotionDialog(from, to, turn) {
 }
 
 async function _requestStockfishMove(count = 1) {
-    document.getElementById('status').innerText = 'Stockfish is thinking…';
+    document.getElementById('status').innerText = 'Stockfish is thinking...';
     for (let i = 0; i < count; i++) {
         if (count > 1) {
             await fetch(`${API_URL}/skip_move`, { method: 'POST' });
@@ -339,6 +348,15 @@ async function _requestStockfishMove(count = 1) {
             const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
+                if (engineLastMove !== null) {
+                    squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
+                    squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
+                }
+
+                squares[_parseUCIMove(data.move)[0]].classList.add('engine');
+                squares[_parseUCIMove(data.move)[1]].classList.add('engine');
+                engineLastMove = data.move;
+
                 const isOver = await updateBoard(false, true);
                 if (isOver) return;
             }
@@ -353,7 +371,13 @@ async function newGame() {
     // just sets up default position, without modifiers
     document.getElementById('gameOverModal')?.classList.add('hidden');
 
-    document.querySelectorAll('.square').forEach(s => {
+    if (engineLastMove !== null) {
+        squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
+        squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
+        engineLastMove = null;
+    }
+
+    squares.forEach(s => {
         s.classList.remove('moveable', 'selected');
     });
 
@@ -370,7 +394,13 @@ async function newGame() {
 async function resetGame() {
     document.getElementById('gameOverModal')?.classList.add('hidden');
 
-    document.querySelectorAll('.square').forEach(s => {
+    if (engineLastMove !== null) {
+        squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
+        squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
+        engineLastMove = null;
+    }
+
+    squares.forEach(s => {
         s.classList.remove('moveable', 'selected');
     });
 
@@ -640,19 +670,28 @@ function initGamePage() {
     document.getElementById('pieceThemeSelect').addEventListener('change', onPieceThemeChange);
     document.getElementById('backgroundColorSelect').addEventListener('change', onBackgroundColorChange);
     document.getElementById('backgroundThemeSelect').addEventListener('change', onBackgroundThemeChange);
+    document.getElementById('checkSquareColorSelect').addEventListener('change', onInCheckSquareColorChange);
+    document.getElementById('selectedSquareColorSelect').addEventListener('change', onSelectedSquareColorChange);
+    document.getElementById('moveableSquareColorSelect').addEventListener('change', onMoveableSquareColorChange);
+    document.getElementById('engineSquareColorSelect').addEventListener('change', onEngineSquareColorChange);
+    
+    // reset data
+    document.getElementById('reset-btn').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
+    document.getElementById('resetModal').addEventListener('click', onResetConfirmationBackdropClick);
+    document.getElementById('reset-yes').addEventListener('click', onResetConfirmed);
+    document.getElementById('reset-no').addEventListener('click', onResetDenied);
 
     document.getElementById('engineSelect').addEventListener('change', onDifficultyChange);
 
     document.getElementById('new-game').addEventListener('click', () => { resetModifiers(); resetGame(); initModifiers(); releaseSettings(); });
-    document.getElementById('undo-btn').addEventListener('click', () => { undoMove(); });
+    document.getElementById('undo-btn').addEventListener('click', undoMove);
+    // modifier 8: remove-piece button
+    document.getElementById('remove-piece-btn').addEventListener('click', _enterRemovePieceMode);
 
     document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
     document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
 
     document.getElementById('home-btn').addEventListener('click', () => { window.location.replace('/'); });
-
-    // modifier 8: remove-piece button
-    document.getElementById('remove-piece-btn').addEventListener('click', _enterRemovePieceMode);
 }
 
 initGamePage();
