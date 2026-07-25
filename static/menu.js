@@ -4,7 +4,7 @@ import {
     initTheme, onBackgroundColorChange, onBackgroundThemeChange, onBoardThemeChange, 
     onEngineSquareColorChange, onInCheckSquareColorChange, onMoveableSquareColorChange, onPieceThemeChange, onSelectedSquareColorChange } from './theme.js';
 import { populateLevelGrid, selectLevel, openLevelSidebar, closeLevelSidebar } from './levels.js';
-import { openSettings, closeSettings, openResetConfirmation, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied } from './settings.js';
+import { openSettings, closeSettings, openResetConfirmation, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied, onResetThemeClick } from './settings.js';
 
 function openInstructions() {
     document.getElementById('instructionsModal').classList.remove('hidden');
@@ -69,7 +69,8 @@ function initMenuPage() {
     document.getElementById('engineSquareColorSelect').addEventListener('change', onEngineSquareColorChange);
 
     // reset data
-    document.getElementById('reset-btn').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
+    document.getElementById('reset-theme').addEventListener('click', () => {onResetThemeClick(); initTheme(); });
+    document.getElementById('reset-data').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
     document.getElementById('resetModal').addEventListener('click', onResetConfirmationBackdropClick);
     document.getElementById('reset-yes').addEventListener('click', onResetConfirmed);
     document.getElementById('reset-no').addEventListener('click', onResetDenied);

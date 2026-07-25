@@ -23,7 +23,7 @@
     background-color: #e2e2e2;
     border: 1px solid #333;
     border-radius: 8px;
-    width: 10vw;
+    width: 12.5vw;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -57,7 +57,7 @@
     border: 2px solid #ec5544;
 }
 
-#reset-btn {
+.reset-btn {
     height: 40px;
     border-radius: 4px;
     background-color: #e0b3ad;
@@ -67,7 +67,7 @@
     text-transform: uppercase;
 }
 
-#reset-btn:hover {
+.reset-btn:hover {
     background-color: #e79a90;
     transform: scale(1.03);
 }

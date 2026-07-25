@@ -14,7 +14,17 @@
 
 <div class="container">
     <div class="game-wrapper">
-        
+        <div class="board-action-strip">
+            <button id="undo-btn" class="strip-btn" data-tooltip="Undo last move">
+                <img src="/static/images/undo_move.png" class="strip-icon">
+                <span class="strip-label">undo</span>
+            </button>
+            <button id="remove-piece-btn" class="strip-btn" data-tooltip="Remove an opponent piece">
+                <img src="/static/images/remove_opponent_piece.png" class="strip-icon">
+                <span class="strip-label">remove</span>
+            </button>
+        </div>
+
         <div id="chessboard" class="chessboard">
             <!-- grid squares added through Javascript -->
         </div>
@@ -178,8 +188,6 @@
         
         <div class="controls">
             <button id="new-game">New Game</button>
-            <button id="undo-btn">Undo</button>
-            <button id="remove-piece-btn">Remove Piece</button>
             <button id="settings-btn">Settings</button>
             <button id="level-select-btn">Level Select</button>
         </div>
@@ -257,7 +265,8 @@
         </div>
 
         <div class="settings-footer">
-            <button id="reset-btn">Click to Reset All Game Data</button>
+            <button class="reset-btn" id="reset-theme">Click to Reset Theme Data</button>
+            <button class="reset-btn" id="reset-data">Click to Reset ALL Game Data</button>
         </div> 
     </div>
 
@@ -314,7 +323,7 @@
 
 <div id="resetModal" class="reset-modal-overlay hidden">
     <div class="reset-modal-content">
-        <h2 class="reset-modal-header">are you sure?</h2>
+        <h2 class="reset-modal-header">reset ALL data?</h2>
         <div class="reset-btn-container">
             <button class="confirmation-btn" id="reset-yes">yes</button>
             <button class="confirmation-btn" id="reset-no">no</button>

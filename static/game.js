@@ -23,7 +23,7 @@ import { useUndoButton, useExtraPlayerMoves, useRemovePiece,
          scrambleFirstRank, removeHalfPieces, movePiecesUp, reflectFirstRanks, noPromotion, extraEngineMoves, removeFourPieces,
          applyExtraPiece, applyScramble, applyRemovePieces, applyMovePiecesUp, applyReflectFirstRanks,
 } from './modifiers.js';
-import { openSettings, closeSettings, onDifficultyChange, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied, openResetConfirmation } from './settings.js';
+import { openSettings, closeSettings, onDifficultyChange, onResetConfirmationBackdropClick, onResetConfirmed, onResetDenied, openResetConfirmation, onResetThemeClick } from './settings.js';
 
 const boardElement = document.getElementById('chessboard');
 let squares = null; // all chessboard squares;
@@ -219,6 +219,14 @@ function _clearSelection() {
     squares.forEach(s => s.classList.remove('moveable'));
 }
 
+function _resetLastEngineMove() {
+    if (engineLastMove !== null) {
+        squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
+        squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
+        engineLastMove = null;
+    }
+}
+
 /** Returns true if the piece on `square` belongs to the player whose turn it is. */
 function _isCurrentPlayerPiece(square, gameState) {
     const whiteUnicode = new Set(['♖', '♘', '♗', '♕', '♔', '♙']);
@@ -348,10 +356,7 @@ async function _requestStockfishMove(count = 1) {
             const res = await fetch(`${API_URL}/stockfish_move`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                if (engineLastMove !== null) {
-                    squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
-                    squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
-                }
+                _resetLastEngineMove();
 
                 squares[_parseUCIMove(data.move)[0]].classList.add('engine');
                 squares[_parseUCIMove(data.move)[1]].classList.add('engine');
@@ -371,15 +376,8 @@ async function newGame() {
     // just sets up default position, without modifiers
     document.getElementById('gameOverModal')?.classList.add('hidden');
 
-    if (engineLastMove !== null) {
-        squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
-        squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
-        engineLastMove = null;
-    }
-
-    squares.forEach(s => {
-        s.classList.remove('moveable', 'selected');
-    });
+    _resetLastEngineMove();
+    _clearSelection();
 
     const fen = getCurrentFEN() == '' ? STARTING_POSITIONS[currentLevel-1] : getCurrentFEN();
     await fetch(`${API_URL}/reset`, {
@@ -394,15 +392,8 @@ async function newGame() {
 async function resetGame() {
     document.getElementById('gameOverModal')?.classList.add('hidden');
 
-    if (engineLastMove !== null) {
-        squares[_parseUCIMove(engineLastMove)[0]].classList.remove('engine');
-        squares[_parseUCIMove(engineLastMove)[1]].classList.remove('engine');
-        engineLastMove = null;
-    }
-
-    squares.forEach(s => {
-        s.classList.remove('moveable', 'selected');
-    });
+    _resetLastEngineMove();
+    _clearSelection();
 
     let fen = getStartingFEN();
 
@@ -455,6 +446,8 @@ async function undoMove() {
     if (undoButtonReleased) {
         const response = await fetch(`${API_URL}/undo`, { method: 'POST' });
         const data = await response.json();
+
+        _resetLastEngineMove();
 
         await fetch(`${API_URL}/undo`, { method: 'POST' });
         await updateBoard(false, true);
@@ -676,7 +669,8 @@ function initGamePage() {
     document.getElementById('engineSquareColorSelect').addEventListener('change', onEngineSquareColorChange);
     
     // reset data
-    document.getElementById('reset-btn').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
+    document.getElementById('reset-theme').addEventListener('click', onResetThemeClick);
+    document.getElementById('reset-data').addEventListener('click', () => {closeSettings(); openResetConfirmation(); });
     document.getElementById('resetModal').addEventListener('click', onResetConfirmationBackdropClick);
     document.getElementById('reset-yes').addEventListener('click', onResetConfirmed);
     document.getElementById('reset-no').addEventListener('click', onResetDenied);

@@ -5,6 +5,7 @@
 @import 'components/level-description.css';
 @import 'components/metrics.css';
 @import 'components/modifiers.css';
+@import 'components/modifier-strip.css';
 @import 'screens/promotion.css';
 @import 'screens/gameover.css';
 @import 'screens/instructions.css';

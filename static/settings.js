@@ -1,5 +1,5 @@
 import { API_URL, DIFFICULTY_ELO } from './constants.js';
-import { resetAllData } from './storage.js';
+import { resetAllData, resetThemeData } from './storage.js';
 import { onBoardThemeChange, onPieceThemeChange } from './theme.js';
 
 export function openSettings() {
@@ -38,6 +38,10 @@ export async function onDifficultyChange() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ elo: stockfish_elo }),
     });
+}
+
+export function onResetThemeClick() {
+    resetThemeData();
 }
 
 export function openResetConfirmation() {

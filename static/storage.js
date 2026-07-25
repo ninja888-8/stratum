@@ -199,8 +199,7 @@ export function setCurrentFEN(fen) {
     setString('currentFEN', fen);
 }
 
-export function resetAllData() {
-    setHighestBeatenLevel(0);
+export function resetThemeData() {
     setBoardTheme('classic');
     setPieceTheme('white');
     setBackgroundColor('#ffffff');
@@ -209,6 +208,12 @@ export function resetAllData() {
     setSelectedSquareColor('#7b9652');
     setMoveableSquareColor('#bbfcdb');
     setEngineSquareColor('#c1bbfc');
+}
+
+export function resetAllData() {
+    resetThemeData();
+    
+    setHighestBeatenLevel(0);
     setDifficultyStarsEarned(0);
     setChallengeStarsEarned(0);
     setDifficultyStarsArray(Array(NUM_LEVELS).fill(0));
