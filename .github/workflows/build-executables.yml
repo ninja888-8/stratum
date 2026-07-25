@@ -2,9 +2,9 @@ name: Build Desktop Apps (macOS & Linux)
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "build" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "build" ]
   workflow_dispatch:
 
 jobs:
