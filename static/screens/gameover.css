@@ -45,13 +45,13 @@
 /* Stars Rating Alignment */
 .stars-container {
     font-size: 2.5rem;
-    color: #000000; /* Default unearned star color */
+    color: #000000;
     margin-bottom: 20px;
     letter-spacing: 5px;
 }
 
 .star.lit {
-    color: #ffca28; /* Gold color for earned stars */
+    color: #ffca28;
     text-shadow: 0 0 10px rgba(255, 202, 40, 0.4);
 }
 

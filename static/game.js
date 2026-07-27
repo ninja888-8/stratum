@@ -115,10 +115,14 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
         if (playerWon) {
             unlockNextLevel();
             populateLevelGrid(_gameLevelClickHandler);
-            _recordCompletions();
+            const challengesCompleted = _recordCompletions();
             updateChallengePanel();
+
+            showGameOverModal(playerWon, document.getElementById('engineSelect').value, challengesCompleted);
         }
-        showGameOverModal(playerWon, document.getElementById('engineSelect').value);
+        else {
+            showGameOverModal(playerWon, document.getElementById('engineSelect').value);
+        }
         return true;
     }
     else {
@@ -651,8 +655,10 @@ function _recordCompletions() {
         diffStarsArray[currentLevel - 1] = thisRun;
         setDifficultyStarsArray(diffStarsArray);
     }
+
+    return challengePassed;
 }
-function showGameOverModal(playerWon, difficulty) {
+function showGameOverModal(playerWon, difficulty, challengesCompleted = [false, false, false]) {
     const DIFFICULTY_LABELS = { '1': 'beginner', '2': 'intermediate', '3': 'advanced' };
     const modal = document.getElementById('gameOverModal');
 
@@ -666,6 +672,15 @@ function showGameOverModal(playerWon, difficulty) {
     document.querySelectorAll('.stars-container .star').forEach(star => {
         const starRating = parseInt(star.getAttribute('data-star'));
         star.classList.toggle('lit', playerWon && starRating <= parseInt(difficulty));
+
+        if (star.dataset.star == 4) {
+            if (challengesCompleted[0] == true)
+                star.style.color = '#1dff08';
+            else if (challengesCompleted[1] == true)
+                star.style.color = '#ffca28';
+            else if (challengesCompleted[2] == true)
+                star.style.color = '#df1010';
+        }
     });
 
     const modifiersList = document.getElementById('modalModifiers');
@@ -678,9 +693,9 @@ function showGameOverModal(playerWon, difficulty) {
         modifiersList.appendChild(li);
     } else {
         activeModifiers.forEach(btn => {
-            const li = document.createElement('li');
-            li.innerText = (btn.getAttribute('data-tooltip') || btn.id.replace('btn-', '')).split('.')[0];
-            modifiersList.appendChild(li);
+            const image = document.createElement('img');
+            image.src = `${btn.querySelector('img').src}`;
+            modifiersList.appendChild(image);
         });
     }
 
@@ -754,8 +769,8 @@ function initGamePage() {
     // modifier 8: remove-piece button
     document.getElementById('remove-piece-btn').addEventListener('click', _enterRemovePieceMode);
 
-    document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
-    document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); newGame(); initModifiers(); releaseSettings(); });
+    document.getElementById('play-again-btn').addEventListener('click', () => { resetModifiers(); resetGame(); initModifiers(); releaseSettings(); });
+    document.getElementById('next-level-btn').addEventListener('click', () => { goToNextLevel(); resetModifiers(); resetGame(); initModifiers(); releaseSettings(); });
 
     document.getElementById('home-btn').addEventListener('click', () => { window.location.replace('/'); });
 }
