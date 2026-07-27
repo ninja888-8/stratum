@@ -37,7 +37,7 @@
  
 .level-btn.active {
     background-color: #2ecc71;
-    color: #fff;
+    color: #ffffff;
     border-color: #27ae60;
 }
  
@@ -78,7 +78,7 @@
 .level-star {
     font-size: 0.6rem;
     color: transparent;
-    -webkit-text-stroke: 1px #aaa;
+    -webkit-text-stroke: 1px #aaaaaa;
     transition: color 0.15s, -webkit-text-stroke 0.15s;
 }
  
@@ -98,11 +98,11 @@
 }
  
 .level-btn:hover .level-star {
-    -webkit-text-stroke-color: #ccc;
+    -webkit-text-stroke-color: #cccccc;
 }
  
 .level-btn.active .level-star {
-    -webkit-text-stroke-color: #ccc;
+    -webkit-text-stroke-color: #cccccc;
 }
 
 .level-btn:hover .level-star--lit-green {

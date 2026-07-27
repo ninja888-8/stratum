@@ -20,7 +20,7 @@
     border: none;
     border-radius: 4px;
     background: var(--box-color);
-    color: white;
+    color: #ffffff;
     font-weight: bold;
     cursor: pointer;
 }

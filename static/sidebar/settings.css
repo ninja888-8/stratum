@@ -8,8 +8,8 @@
 .settings-sidebar {
     position: fixed;
     top: 0;
-    right: -350px;
-    width: 300px;
+    right: -25vw;
+    width: 20vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -22,7 +22,7 @@
     font-family: sans-serif;
 }
 
-/* sidebar slides in when opened*/
+/* sidebar slides in when opened */
 .settings-sidebar.open {
     right: 0; 
 }
@@ -69,14 +69,14 @@
 .setting-item select {
     padding: 8px;
     border-radius: 4px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
     font-size: 16px;
 }
 
 .setting-item input {
     width: 260px;
     height: 40px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
 }
 
 .theme-select {

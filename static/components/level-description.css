@@ -66,13 +66,13 @@
 .challenge-star-green,
 .challenge-star,
 .challenge-star-red {
-    color: #555;
+    color: #555555;
     letter-spacing: 2px;
 }
 .challenge-status-green,
 .challenge-status,
 .challenge-status-red {
-    color: #555;
+    color: #555555;
     text-transform: uppercase;
     font-weight: 500;
     font-size: 0.75rem;
@@ -80,14 +80,14 @@
 
 .challenge-desc {
     font-size: 0.8rem;
-    color: #999;
+    color: #999999;
     margin: 0;
     line-height: 1.4;
 }
 
 .challenge-card.completed {
     border-color: #ffffff;
-    background: #333;
+    background: #333333;
     box-shadow: 0 0 15px rgba(255, 202, 40, 0.05);
 }
 
@@ -119,9 +119,9 @@
 }
 
 .challenge-card.completed .challenge-name {
-    color: #fff;
+    color: #ffffff;
 }
 
 .challenge-card.completed .challenge-desc {
-    color: #ddd;
+    color: #dddddd;
 }

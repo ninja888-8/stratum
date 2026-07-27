@@ -27,7 +27,7 @@
 }
 
 .instruction-img-container {
-    background-color: #111;
+    background-color: #111111;
     border: 1px solid #2a2a2a;
     border-radius: 4px;
     padding: 10px;
@@ -45,7 +45,7 @@
 
 .img-caption {
     font-size: 0.8rem;
-    color: #999;
+    color: #999999;
     margin: 8px 0 0 0 !important;
 }
 
@@ -54,20 +54,20 @@
     top: 20px;
     right: 25px;
     font-size: 1.8rem;
-    color: #555;
+    color: #555555;
     cursor: pointer;
     transition: color 0.2s;
 }
 .close-modal-btn:hover {
-    color: #fff;
+    color: #ffffff;
 }
 
 .modal-close-action-btn {
     width: 100%;
     padding: 12px;
     background-color: #2a2a2a;
-    border: 1px solid #444;
-    color: #eee;
+    border: 1px solid #444444;
+    color: #eeeeee;
     border-radius: 4px;
     font-family: inherit;
     cursor: pointer;
@@ -75,6 +75,6 @@
     transition: background 0.2s;
 }
 .modal-close-action-btn:hover {
-    background-color: #333;
-    color: #fff;
+    background-color: #333333;
+    color: #ffffff;
 }
