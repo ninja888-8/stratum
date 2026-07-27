@@ -1,6 +1,7 @@
 export const API_URL = 'http://127.0.0.1:5000/api';
 export const NUM_LEVELS = 25;
 export const NUM_MODIFIERS = 20;
+const CHESSBOARD_PATH = '/static/images/chessboard/';
 
 export const BUFF_MULTIPLIERS = [
     0.5, 0.55, 0.6, 0.6, 0.9, 0.7, 0.9, 0.6,
@@ -19,6 +20,14 @@ export const BUTTON_BLOCK_RULES = [
 export const PIECE_MAP = {
     r: '♜', n: '♞', b: '♝', q: '♛', k: '♚', p: '♟',
     R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙',
+    '.': '',
+};
+
+export const PIECE_MAP_IMAGE = {
+    r: `${CHESSBOARD_PATH}b-rook.png`, n: `${CHESSBOARD_PATH}b-knight.png`, b: `${CHESSBOARD_PATH}b-bishop.png`, 
+    q: `${CHESSBOARD_PATH}b-queen.png`, k: `${CHESSBOARD_PATH}b-king.png`, p: `${CHESSBOARD_PATH}b-pawn.png`,
+    R: `${CHESSBOARD_PATH}w-rook.png`, N: `${CHESSBOARD_PATH}w-knight.png`, B: `${CHESSBOARD_PATH}w-bishop.png`, 
+    Q: `${CHESSBOARD_PATH}w-queen.png`, K: `${CHESSBOARD_PATH}w-king.png`, P: `${CHESSBOARD_PATH}w-pawn.png`,
     '.': '',
 };
 

@@ -52,3 +52,18 @@
 .square.check { background-color: var(--board-check); }
 .square.engine { background-color: var(--board-engine); }
 .square.moveable { background-color: var(--board-moveable); }
+
+.chessboard-piece {
+    height: 64px;
+    width: 64px; 
+    max-width: 100%;
+    cursor: grab;
+}
+
+.chessboard-piece:active {
+    cursor: grabbing;
+}
+
+img.chessboard-piece[src=""] {
+    display: none;
+}

@@ -1,4 +1,4 @@
-import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST, CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER} from './constants.js';
+import { API_URL, NUM_LEVELS, PIECE_MAP, STARTING_POSITIONS, CHALLENGES, CHALLENGES_REQUIRED_MODIFIERS_LIST, CHALLENGES_REQUIRED_DIFFICULTY_MULTIPLIER, PIECE_MAP_IMAGE} from './constants.js';
 import {
     initStorage,
     isInGame, setInGame,
@@ -28,6 +28,7 @@ import { openSettings, closeSettings, onDifficultyChange, onResetConfirmationBac
 const boardElement = document.getElementById('chessboard');
 let squares = null; // all chessboard squares;
 let selectedSquare = null;
+let currentDraggedPiece = null;
 let engineLastMove = null; // in UCI
 let isGameConfirmed = false;
 let removePieceMode = false; // modifier 8: true while awaiting opponent piece click
@@ -50,10 +51,21 @@ function createBoard() {
         const col = i % 8;
 
         const square = document.createElement('div');
+        const image = document.createElement('img');
         square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
         square.dataset.index = i;
         square.dataset.file = String.fromCharCode(97 + col);
         square.dataset.rank = String(8 - row);
+        square.dataset.piece = '';
+        square.ondragover = dragoverHandler;
+        square.ondrop = dropHandler;
+
+        image.src = "";
+        image.alt = "";
+        image.draggable = "true";
+        image.ondragstart = dragstartHandler;
+        image.classList.add('chessboard-piece');
+        square.appendChild(image);
 
         square.addEventListener('click', () => {
             if (isGameConfirmed) handleSquareClick(square);
@@ -77,7 +89,6 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
 
     if (!fromPreviousFEN) setCurrentFEN(gameState.fen);
 
-    // Expand FEN rows into a flat 64-element array of piece characters
     const flatBoard = [];
     for (const row of fenRows) {
         for (const char of row) {
@@ -87,12 +98,12 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
     }
 
     flatBoard.forEach((piece, idx) => {
-        squares[idx].textContent = PIECE_MAP[piece] ?? '';
+        squares[idx].dataset.piece = PIECE_MAP[piece] ?? '';
+        squares[idx].querySelector('img').src = PIECE_MAP_IMAGE[piece] ?? '';
 
-        // Highlight king in check
         const inCheck = gameState.is_check;
-        if (piece === 'k' && inCheck === 'b') squares[idx].classList.add('check');
-        else if (piece === 'K' && inCheck === 'w') squares[idx].classList.add('check');
+        if (piece === '♚' && inCheck === 'b') squares[idx].classList.add('check');
+        else if (piece === '♔' && inCheck === 'w') squares[idx].classList.add('check');
         else squares[idx].classList.remove('check');
     });
 
@@ -114,13 +125,73 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
         // check if due to modifier, is stalemate or checkmate
         for (let i = 0; i < legalMoves.length; i++) {
             let move = _parseUCIMove(legalMoves[i]);
-            if (!bannedPieces.includes(squares[move[0]].textContent)) return false; // player did not lose yet
+            if (!bannedPieces.includes(squares[move[0]].dataset.piece)) return false; // player did not lose yet
         }
 
         // otherwise no legal moves, so game over player loses
         showGameOverModal(false, document.getElementById('engineSelect').value);
         return true;
     }
+}
+
+function dragstartHandler(ev) {
+    if (ev.target.src == '' || ev.target.closest('.square').dataset.piece === '') {
+        ev.preventDefault();
+        return;
+    }
+    
+    currentDraggedPiece = ev.target;
+    ev.dataTransfer.setData("text/plain", ev.target.closest('.square').dataset.index);
+    ev.dataTransfer.effectAllowed = "move";
+}
+
+function dragoverHandler(ev) {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = "move";
+}
+
+async function dropHandler(ev) {
+    ev.preventDefault();
+    const draggedPiece = currentDraggedPiece;
+    if (!draggedPiece) return;
+
+    const startingSquare = draggedPiece.closest('.square');
+    const destinationSquare = ev.target.closest('.square');
+
+    if (startingSquare == destinationSquare) {
+        currentDraggedPiece = null;
+        return;
+    }
+
+    const from = startingSquare.getAttribute('data-file') + startingSquare.getAttribute('data-rank');
+    const to = destinationSquare.getAttribute('data-file') + destinationSquare.getAttribute('data-rank');
+
+    const isPawnPromotion =
+        (startingSquare.dataset.piece === '♟' && destinationSquare.dataset.rank === '1') ||
+        (startingSquare.dataset.piece === '♙' && destinationSquare.dataset.rank === '8');
+
+    if (isPawnPromotion) {
+        if (bannedPieces.includes(startingSquare.dataset.piece)) return;
+        if (noPromotion) return;
+
+        const isLegal = await _checkLegalMove(from, to, 'q');
+        if (isLegal && destinationSquare.dataset.piece !== '♚') {
+            await _showPromotionDialog(from, to, gameState.turn);
+            _clearSelection();
+        }
+    } 
+    else {
+        const isLegal = await _checkLegalMove(from, to, '');
+        if (isLegal && destinationSquare.dataset.piece !== '♚') {
+            if (bannedPieces.includes(startingSquare.dataset.piece)) return;
+
+            let isGameOver = await _sendMove(from, to, '');
+            await updateBoard(false, isGameOver);
+            _clearSelection();
+        }
+    }
+
+    currentDraggedPiece = null;
 }
 
 async function handleSquareClick(square) {
@@ -141,11 +212,11 @@ async function handleSquareClick(square) {
         }
 
         const isPawnPromotion =
-            (selectedSquare.textContent === '♟' && square.dataset.rank === '1') ||
-            (selectedSquare.textContent === '♙' && square.dataset.rank === '8');
+            (selectedSquare.dataset.piece === '♟' && square.dataset.rank === '1') ||
+            (selectedSquare.dataset.piece === '♙' && square.dataset.rank === '8');
 
         if (isPawnPromotion) {
-            if (bannedPieces.includes(selectedSquare.textContent)) return;
+            if (bannedPieces.includes(selectedSquare.dataset.piece)) return;
 
             // modifier 18 no pawn promotion
             if (noPromotion) {
@@ -153,15 +224,15 @@ async function handleSquareClick(square) {
             }
 
             const isLegal = await _checkLegalMove(from, to, 'q');
-            if (isLegal && square.textContent != '♚') {
+            if (isLegal && square.dataset.piece != '♚') {
                 await _showPromotionDialog(from, to, gameState.turn);
                 _clearSelection();
             }
         } 
         else {
             const isLegal = await _checkLegalMove(from, to, '');
-            if (isLegal && square.textContent != '♚') {
-                if (bannedPieces.includes(selectedSquare.textContent)) return;
+            if (isLegal && square.dataset.piece != '♚') {
+                if (bannedPieces.includes(selectedSquare.dataset.piece)) return;
 
                 let isGameOver = await _sendMove(from, to, '');
                 await updateBoard(false, isGameOver);
@@ -180,7 +251,7 @@ async function handleSquareClick(square) {
 async function _selectSquare(square, gameState) {
     _clearSelection();
 
-    if (!square.textContent || !_isCurrentPlayerPiece(square, gameState)) {
+    if (!square.dataset.piece || !_isCurrentPlayerPiece(square, gameState)) {
         selectedSquare = null;
         return;
     }
@@ -189,7 +260,7 @@ async function _selectSquare(square, gameState) {
     square.classList.add('selected');
 
     // cannot move piece due to modifier
-    if (bannedPieces.includes(selectedSquare.textContent)) return;
+    if (bannedPieces.includes(selectedSquare.dataset.piece)) return;
 
     for (let i = 0; i < 64; i++) {
         const row = Math.floor(i / 8);
@@ -201,13 +272,13 @@ async function _selectSquare(square, gameState) {
         const to = file + rank;
 
         const promotionSuffix =
-            (square.textContent === '♟' && rank === '1') ||
-            (square.textContent === '♙' && rank === '8') ? 'q' : '';
+            (square.dataset.piece === '♟' && rank === '1') ||
+            (square.dataset.piece === '♙' && rank === '8') ? 'q' : '';
 
         // hide promotion as legal move if modifier 18
         if (promotionSuffix && noPromotion) continue;
 
-        if (legalMoves.includes(from + to + promotionSuffix) && squares[i].textContent != '♚') {
+        if (legalMoves.includes(from + to + promotionSuffix) && squares[i].dataset.piece != '♚') {
             squares[i].classList.add('moveable');
         }
     }
@@ -230,18 +301,19 @@ function _resetLastEngineMove() {
 /** Returns true if the piece on `square` belongs to the player whose turn it is. */
 function _isCurrentPlayerPiece(square, gameState) {
     const whiteUnicode = new Set(['♖', '♘', '♗', '♕', '♔', '♙']);
-    const isWhite = whiteUnicode.has(square.textContent);
+    const isWhite = whiteUnicode.has(square.dataset.piece);
     return (gameState.turn === 'w' && isWhite) || (gameState.turn === 'b' && !isWhite);
 }
 
 function _isOpponentPiece(square, gameState) {
-    return square.textContent !== '' && !_isCurrentPlayerPiece(square, gameState);
+    return square.dataset.piece !== '' && !_isCurrentPlayerPiece(square, gameState);
 }
 
 function _parseUCIMove(uciMove) {
     return [
         (uciMove.charCodeAt(0) - "a".charCodeAt(0)) + 8 * (8 - parseInt(uciMove[1])),
-        (uciMove.charCodeAt(2) - "a".charCodeAt(0)) + 8 * (8 - parseInt(uciMove[3]))
+        (uciMove.charCodeAt(2) - "a".charCodeAt(0)) + 8 * (8 - parseInt(uciMove[3])),
+        (uciMove.length == 5 ? uciMove[4] : '')
     ]
 }
 
@@ -253,7 +325,7 @@ function _enterRemovePieceMode() {
     // highlight all non-king opponent pieces
     squares.forEach(sq => {
         const blackUnicode = new Set(['♜', '♞', '♝', '♛', '♟']);
-        if (blackUnicode.has(sq.textContent)) sq.classList.add('moveable');
+        if (blackUnicode.has(sq.dataset.piece)) sq.classList.add('moveable');
     });
 }
 
@@ -264,7 +336,7 @@ async function _handleSquareRemoveClick(square) {
     squares.forEach(s => s.classList.remove('moveable'));
 
     // Only allow removing actual enemy pieces (not the king)
-    if (!blackUnicode.has(square.textContent) || square.textContent === '♚') {
+    if (!blackUnicode.has(square.dataset.piece) || square.dataset.piece === '♚') {
         _setStatus('Select a valid opponent piece to remove (not the King). Try again by pressing the button.');
         return false; // didn't go through; do it later
     }

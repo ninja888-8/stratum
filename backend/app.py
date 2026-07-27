@@ -262,6 +262,8 @@ if __name__ == '__main__':
         title='stratum', 
         url='http://127.0.0.1:5000',
         resizable=True,
+        easy_drag=False,
+        draggable=True,
     )
     window.events.closed += on_closed
     webview.start(maximize, window, icon=ICON_PATH, private_mode=False)
