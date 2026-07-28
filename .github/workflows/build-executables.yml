@@ -18,12 +18,14 @@ jobs:
           - os: ubuntu-latest
             platform_name: linux
             asset_name: stratum-linux
+            stockfish_name: stockfish-linux
             stockfish_url: "https://github.com/official-stockfish/Stockfish/releases/download/sf_18/stockfish-ubuntu-x86-64.tar"
             icon_path: "static/images/gain_pawn.png"
             
           - os: macos-latest
             platform_name: macos
-            asset_name: stratum-mac
+            asset_name: stratum-macos
+            stockfish_name: stockfish-mac
             stockfish_url: "https://github.com/official-stockfish/Stockfish/releases/download/sf_18/stockfish-macos-m1-apple-silicon.tar"
             icon_path: "static/images/icon.icns"
 
@@ -57,9 +59,9 @@ jobs:
           mkdir -p temp_sf
           tar -xvf stockfish_archive.tar -C temp_sf
           
-          find temp_sf -maxdepth 2 -type f -name "stockfish*" -exec mv {} engine/stockfish/${{ matrix.asset_name }} \;
+          find temp_sf -maxdepth 2 -type f -name "stockfish*" -exec mv {} engine/stockfish/${{ matrix.stockfish_name }} \;
           
-          chmod +x engine/stockfish/${{ matrix.asset_name }}
+          chmod +x engine/stockfish/${{ matrix.stockfish_name }}
           
           rm -rf stockfish_archive.tar temp_sf
           
@@ -71,7 +73,7 @@ jobs:
             --icon "${{ matrix.icon_path }}" \
             --add-data "templates:templates" \
             --add-data "static:static" \
-            --add-data "engine/stockfish/stockfish:engine/stockfish" \
+            --add-data "engine/stockfish/${{ matrix.stockfish_name }}:engine/stockfish" \
             --name "${{ matrix.asset_name }}" \
             backend/app.py
 
