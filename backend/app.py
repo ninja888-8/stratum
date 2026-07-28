@@ -27,7 +27,7 @@ class GameState:
 
     def start_engine(self) -> None:
         try:
-            self.engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH, startupinfo=get_startupinfo())
+            self.engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
 
             self.engine.configure({
                 "Hash": 32,
@@ -155,7 +155,7 @@ def game_page():
 @app.route('/api/legal_moves', methods=['GET'])
 def get_legal_moves():
     """Helper function to package the current board state."""
-    legal_uci_strings = [move.uci() for move in game.board.legal_moves]
+    legal_uci_strings = [move.uci() for move in get_game().board.legal_moves]
     return jsonify(legal_uci_strings)
 
 @app.route('/api/state', methods=['GET'])
