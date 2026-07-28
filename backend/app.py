@@ -1,37 +1,23 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
 import os
 import chess
 import chess.engine
+import uuid
+import time
 
-from threading import Thread
-import subprocess
-import sys
-import webview
+app = Flask(__name__, static_folder='static')
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+CORS(app, supports_credentials=True, origins=[
+    'https://stratum-ynaa.onrender.com'
+])
 
-# PATHS
-def get_base_dir():
-    if getattr(sys, 'frozen', False):
-        return sys._MEIPASS
-    else:
-        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
-def get_stockfish_filename():
-    if sys.platform == 'win32':
-        return 'stockfish.exe'
-    elif sys.platform == 'darwin':
-        return 'stockfish-mac'
-    else:
-        return 'stockfish-linux'
-
-BASE_DIR = get_base_dir()
-TEMPLATES_PATH = os.path.join(BASE_DIR, 'templates')
-STATIC_PATH = os.path.join(BASE_DIR, 'static')
-STOCKFISH_PATH = os.path.join(BASE_DIR, 'engine', 'stockfish', get_stockfish_filename())
-ICON_PATH = os.path.join(STATIC_PATH, 'images', 'icon.ico')
-
-app = Flask(__name__, template_folder=TEMPLATES_PATH, static_folder=STATIC_PATH)
-CORS(app) 
+games = {}
 
 class GameState:
     def __init__(self):
@@ -84,7 +70,7 @@ class GameState:
                 "UCI_Elo": self.elo,
             })
 
-    def get_stockfish_move(self, depth=15, limit_time=1.5) -> chess.Move | None:
+    def get_stockfish_move(self, depth=12, limit_time=0.2) -> chess.Move | None:
         """
         stockfish, asks it for the best move under specific constraints and makes the move
         """
@@ -135,26 +121,36 @@ class GameState:
             "status_text": status_text
         }
 
-game = GameState()
+def get_game() -> GameState:
+    if 'game_id' not in session:
+        session['game_id'] = str(uuid.uuid4())
 
-def get_startupinfo():
-    if sys.platform == 'win32':
-        info = subprocess.STARTUPINFO()
-        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        info.wShowWindow = subprocess.SW_HIDE
-        return info
-    else:
-        return None
+    game_id = session['game_id']
+
+    # clean up inactive games for more than 2 hours
+    now = time.time()
+    stale = [g_id for g_id, g in games.items() if now - g.get('last_active', now) > 7200]
+    for g_id in stale:
+        try:
+            games[g_id]['engine'].close()
+        except Exception:
+            pass
+        del games[g_id]
+
+    if game_id not in games:
+        games[game_id] = GameState()
+    
+    return games[game_id]
 
 @app.route('/')
 def home():
     """Generates HTML webpage (home screen)"""
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
 @app.route('/game')
 def game_page():
     """Generates HTML webpage (game screen)"""
-    return render_template('game.html')
+    return send_from_directory('.', 'game.html')
 
 @app.route('/api/legal_moves', methods=['GET'])
 def get_legal_moves():
@@ -165,14 +161,14 @@ def get_legal_moves():
 @app.route('/api/state', methods=['GET'])
 def get_state():
     """Returns the json of the current game state"""
-    return jsonify(game.get_state())
+    return jsonify(get_game().get_state())
 
 @app.route('/api/set_elo', methods=['POST'])
 def set_elo():
     data = request.json
     elo = data.get('elo')
     
-    game.set_elo(elo)
+    get_game().set_elo(elo)
     return jsonify({"success": True})
 
 @app.route('/api/remove_piece', methods=['POST'])
@@ -180,14 +176,14 @@ def remove_piece():
     data = request.json
     square = data.get('square')
     try:
-        game.board.remove_piece_at(chess.parse_square(square))
+        get_game().board.remove_piece_at(chess.parse_square(square))
         return jsonify({"success": True})
     except ValueError:
         return jsonify({"success": False})
     
 @app.route('/api/skip_move', methods=['POST'])
 def skip_move():
-    game.board.push(chess.Move.null())
+    get_game().board.push(chess.Move.null())
     return jsonify({"success": True})
     
 @app.route('/api/move', methods=['POST'])
@@ -198,27 +194,27 @@ def make_move():
 
     try:
         move = chess.Move.from_uci(uci_move)
-        game.board.push(move)
-        return jsonify({"success": True, "state": game.get_state()})
+        get_game().board.push(move)
+        return jsonify({"success": True, "state": get_game().get_state()})
     except ValueError:
-        return jsonify({"success": False, "state": game.get_state()})
+        return jsonify({"success": False, "state": get_game().get_state()})
     
 @app.route('/api/stockfish_move', methods=['POST'])
 def stockfish_move():
-    if game.board.is_game_over():
+    if get_game().board.is_game_over():
         return jsonify({"success": False, "message": "Game is already over"})
     
-    best_move = game.get_stockfish_move()
+    best_move = get_game().get_stockfish_move()
     
-    if best_move and best_move in game.board.legal_moves:
+    if best_move and best_move in get_game().board.legal_moves:
         move_uci = best_move.uci()
-        game.board.push(best_move) # execute move onto python chess board
+        get_game().board.push(best_move) # execute move onto python chess board
         
         return jsonify({
             "success": True, 
             "move": move_uci,
-            "fen": game.board.fen(),
-            "turn": "w" if game.board.turn == chess.WHITE else "b"
+            "fen": get_game().board.fen(),
+            "turn": "w" if get_game().board.turn == chess.WHITE else "b"
         })
     
     return jsonify({"success": False, "message": "Stockfish failed to pick a legal move"})
@@ -228,42 +224,17 @@ def reset():
     data = request.json
     fen = data.get('fen') # setup position based on FEN 
 
-    game.reset_board(fen)
+    get_game().reset_board(fen)
 
-    return jsonify(game.get_state())
+    return jsonify(get_game().get_state())
 
 @app.route('/api/undo', methods=['POST'])
 def undo():
-    if len(game.board.move_stack) > 0:
-        game.board.pop()
+    if len(get_game().board.move_stack) > 0:
+        get_game().board.pop()
         return jsonify({"success": True})
     else:
         return jsonify({"success": False})
 
-def run_backend():
-    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
-
-def maximize(window):
-    window.maximize()
-
-def on_closed():
-    game.stop_engine()
-
 if __name__ == '__main__':
-    # stockfish debugging
-    print(f"Looking for Stockfish at: {STOCKFISH_PATH}")
-    print(f"Stockfish exists: {os.path.exists(STOCKFISH_PATH)}")
-
-    game.start_engine()
-    backend_thread = Thread(target=run_backend, daemon=True)
-    backend_thread.start()
-    
-    window = webview.create_window(
-        title='stratum', 
-        url='http://127.0.0.1:5000',
-        resizable=True,
-        easy_drag=False,
-        draggable=True,
-    )
-    window.events.closed += on_closed
-    webview.start(maximize, window, icon=ICON_PATH, private_mode=False)
+    app.run(debug=True, port=5000)
