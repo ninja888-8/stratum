@@ -78,8 +78,8 @@ function createBoard() {
 }
 
 async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
+    gameState = await (await fetch(`${API_URL}/state`)).json();
     if (fromPreviousFEN || sendAPIRequest) {
-        gameState = await (await fetch(`${API_URL}/state`)).json();
         legalMoves = await (await fetch(`${API_URL}/legal_moves`)).json();
     }
 
@@ -114,9 +114,9 @@ async function updateBoard(fromPreviousFEN = false, sendAPIRequest = false) {
         const playerWon = !gameState.is_draw && gameState.turn === 'b';
         if (playerWon) {
             unlockNextLevel();
-            populateLevelGrid(_gameLevelClickHandler);
             const challengesCompleted = _recordCompletions();
             updateChallengePanel();
+            populateLevelGrid(_gameLevelClickHandler);
 
             showGameOverModal(playerWon, document.getElementById('engineSelect').value, challengesCompleted);
         }
@@ -143,6 +143,8 @@ function dragstartHandler(ev) {
         ev.preventDefault();
         return;
     }
+
+    _showMoveableSquares(ev.target.closest('.square'));
     
     currentDraggedPiece = ev.target;
     ev.dataTransfer.setData("text/plain", ev.target.closest('.square').dataset.index);
@@ -164,6 +166,7 @@ async function dropHandler(ev) {
 
     if (startingSquare == destinationSquare) {
         currentDraggedPiece = null;
+        handleSquareClick(startingSquare);
         return;
     }
 
@@ -189,9 +192,7 @@ async function dropHandler(ev) {
         if (isLegal && destinationSquare.dataset.piece !== '♚') {
             if (bannedPieces.includes(startingSquare.dataset.piece)) return;
 
-            let isGameOver = await _sendMove(from, to, '');
-            await updateBoard(false, isGameOver);
-            _clearSelection();
+            await _sendMove(from, to, '');
         }
     }
 
@@ -238,9 +239,7 @@ async function handleSquareClick(square) {
             if (isLegal && square.dataset.piece != '♚') {
                 if (bannedPieces.includes(selectedSquare.dataset.piece)) return;
 
-                let isGameOver = await _sendMove(from, to, '');
-                await updateBoard(false, isGameOver);
-                _clearSelection();
+                await _sendMove(from, to, '');
             }
             else if (_isCurrentPlayerPiece(square, gameState)) {
                 _clearSelection();
@@ -266,18 +265,22 @@ async function _selectSquare(square, gameState) {
     // cannot move piece due to modifier
     if (bannedPieces.includes(selectedSquare.dataset.piece)) return;
 
+    _showMoveableSquares(square);
+}
+
+function _showMoveableSquares(startingSquare) {
     for (let i = 0; i < 64; i++) {
         const row = Math.floor(i / 8);
         const col = i % 8;
         const file = String.fromCharCode(97 + col);
         const rank = String(8 - row);
 
-        const from = square.dataset.file + square.dataset.rank;
+        const from = startingSquare.dataset.file + startingSquare.dataset.rank;
         const to = file + rank;
 
         const promotionSuffix =
-            (square.dataset.piece === '♟' && rank === '1') ||
-            (square.dataset.piece === '♙' && rank === '8') ? 'q' : '';
+            (startingSquare.dataset.piece === '♟' && rank === '1') ||
+            (startingSquare.dataset.piece === '♙' && rank === '8') ? 'q' : '';
 
         // hide promotion as legal move if modifier 18
         if (promotionSuffix && noPromotion) continue;
@@ -391,11 +394,9 @@ async function _sendMove(from, to, promotion) {
         await updateBoard(false, true);
     } else {
         _clearSelection();
-        await updateBoard(false);
+        await updateBoard(false, data.state.is_game_over);
         await _requestStockfishMove();
     }
-
-    return data.state.is_game_over;
 }
 
 async function _showPromotionDialog(from, to, turn) {
@@ -415,8 +416,7 @@ async function _showPromotionDialog(from, to, turn) {
             document.getElementById('promotionOverlay').style.display = 'none';
             const isLegal = await _checkLegalMove(from, to, pieces[i]);
             if (isLegal) {
-                let isGameOver = await _sendMove(from, to, pieces[i]);
-                await updateBoard(false, isGameOver);
+                await _sendMove(from, to, pieces[i]);
             }
         };
     });

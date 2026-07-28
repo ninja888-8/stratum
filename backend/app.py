@@ -84,7 +84,7 @@ class GameState:
                 "UCI_Elo": self.elo,
             })
 
-    def get_stockfish_move(self, depth=15, limit_time=1) -> chess.Move | None:
+    def get_stockfish_move(self, depth=15, limit_time=1.5) -> chess.Move | None:
         """
         stockfish, asks it for the best move under specific constraints and makes the move
         """
