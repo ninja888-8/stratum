@@ -18,7 +18,12 @@ singleplayer chess with a small twist (modifiers!)
 
 # standalone executable
 
-navigate to *releases* tab, and download the executable and run!
+navigate to *releases* tab, and download the executable for your specific operating system!
+
+for mac & linux, run the following command to ensure the file is executable
+```
+$ chmod +x [executable name]
+```
 
 # local hosting
 
@@ -37,7 +42,7 @@ $ python3 backend\app.py
 ```
 (from the root directory) and you're all set!
 
-# web playable
+# web playable (demo)
 
 (code located on the web branch of this repository)
 
