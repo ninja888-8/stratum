@@ -43,7 +43,6 @@
     font-size: 50px;
     cursor: pointer;
     user-select: none;
-    text-shadow: 0px 0px 3px var(--board-highlight), 0px 0px 10px var(--board-highlight);
 }
 
 .square.light { background-color: var(--board-light); }
@@ -58,6 +57,7 @@
     width: 64px; 
     max-width: 100%;
     cursor: grab;
+    filter: drop-shadow(0px 0px 10px var(--board-highlight));
 }
 
 .chessboard-piece:active {

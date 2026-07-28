@@ -1,7 +1,7 @@
 # stratum
 singleplayer chess with a small twist (modifiers!)
 
-<img width="1496" height="670" alt="image" src="https://github.com/user-attachments/assets/2cee0385-661a-4dc6-8f91-936eba5b820d" />
+![demo image](/static/images/demo_image.png)
 
 ### modifiers
 - changes the game slightly (a buff, a debuff, or something in between?)
