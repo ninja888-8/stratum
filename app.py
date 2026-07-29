@@ -24,6 +24,7 @@ class GameState:
         self.board = chess.Board()
         self.engine: chess.engine.SimpleEngine | None = None
         self.elo = 1320
+        self.last_active = time.time()
 
     def start_engine(self) -> None:
         try:
@@ -129,16 +130,18 @@ def get_game() -> GameState:
 
     # clean up inactive games for more than 2 hours
     now = time.time()
-    stale = [g_id for g_id, g in games.items() if now - g.get('last_active', now) > 7200]
+    stale = [g_id for g_id, g in games.items() if now - getattr(g, 'last_active', now) > 7200]
     for g_id in stale:
         try:
-            games[g_id]['engine'].close()
+            games[g_id].stop_engine()
+            del games[g_id]
         except Exception:
             pass
-        del games[g_id]
 
     if game_id not in games:
         games[game_id] = GameState()
+
+    games[game_id].last_active = now
     
     return games[game_id]
 
