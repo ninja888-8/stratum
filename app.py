@@ -5,6 +5,7 @@ import chess
 import chess.engine
 import uuid
 import time
+import threading
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
@@ -17,81 +18,64 @@ CORS(app, supports_credentials=True, origins=[
 
 STOCKFISH_PATH = os.path.join(os.path.dirname(__file__), 'stockfish')
 
-games = {}
+global_engine: chess.engine.SimpleEngine | None = None
+engine_lock = threading.Lock()
+
+def get_global_engine():
+    global global_engine
+    if global_engine is None:
+        try:
+            global_engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+            global_engine.configure({
+                "Hash": 32,
+                "Threads": 1,
+            })
+        except Exception as e:
+            print(f"Error starting Stockfish: {e}")
+            global_engine = None
+            return None
+
+    try:
+        global_engine.ping()
+    except Exception:
+        try:
+            global_engine.close()
+        except Exception:
+            pass
+        global_engine = None
+        return get_global_engine()
+
+    return global_engine
 
 class GameState:
     def __init__(self):
         self.board = chess.Board()
-        self.engine: chess.engine.SimpleEngine | None = None
         self.elo = 1320
         self.last_active = time.time()
 
-    def start_engine(self) -> None:
-        try:
-            self.engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
-
-            self.engine.configure({
-                "Hash": 32,
-                "Threads": 1,
-                "UCI_LimitStrength": True,
-                "UCI_Elo": self.elo,
-            })
-        except Exception as e:
-            self.engine = None
-            print(f"Error starting Stockfish: {e}")
-
-    def stop_engine(self) -> None:
-        if self.engine is not None:
-            try:
-                self.engine.close()
-            except Exception:
-                pass
-
-            self.engine = None
-
-    def get_engine(self) -> chess.engine.SimpleEngine | None:
-        if self.engine is None:
-            self.start_engine()
-            return self.engine
-        
-        try:
-            self.engine.ping()
-        except Exception:
-            self.stop_engine()
-            self.start_engine()
-
-        return self.engine
-    
     def set_elo(self, elo) -> None:
         self.elo = elo
-        eng = self.get_engine()
-        if eng is not None:
-            eng.configure({
-                "UCI_LimitStrength": True,
-                "UCI_Elo": self.elo,
-            })
 
     def get_stockfish_move(self, depth=12, limit_time=0.2) -> chess.Move | None:
         """
         stockfish, asks it for the best move under specific constraints and makes the move
         """
-
-        # try up to 3 times in case stockfish happens to crash
-        for attempt in range(3):
-            eng = self.get_engine()
+        with engine_lock:
+            eng = get_global_engine()
             if eng is None:
-                self.start_engine()
-                eng = self.get_engine()
+                return None
 
             try:
+                eng.configure({
+                    "UCI_LimitStrength": True,
+                    "UCI_Elo": self.elo,
+                })
                 limit = chess.engine.Limit(time=limit_time, depth=depth)
                 result = eng.play(self.board, limit)
                 return result.move
             except Exception as e:
-                print(f"Attempt {attempt+1} communicating with Stockfish failed: {e}")
-                self.stop_engine()
-        
-        return None
+                print(f"Communicating with Stockfish failed: {e}")
+                return None
 
     def reset_board(self, fen) -> None:
         self.board = chess.Board(fen)
@@ -122,6 +106,8 @@ class GameState:
             "status_text": status_text
         }
 
+games = {}
+
 def get_game() -> GameState:
     if 'game_id' not in session:
         session['game_id'] = str(uuid.uuid4())
@@ -133,7 +119,6 @@ def get_game() -> GameState:
     stale = [g_id for g_id, g in games.items() if now - getattr(g, 'last_active', now) > 7200]
     for g_id in stale:
         try:
-            games[g_id].stop_engine()
             del games[g_id]
         except Exception:
             pass
